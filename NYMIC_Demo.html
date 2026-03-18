@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NYMIC — Smart Nicotine Management</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600&display=swap');
+
+:root {
+  --g1: #4ade80;
+  --g2: #22d3ee;
+  --g3: #3b82f6;
+  --bg: #060b0f;
+  --bg2: #0b1318;
+  --bg3: #111d24;
+  --border: #1a2d3a;
+  --border2: #243b4a;
+  --text: #cde8f0;
+  --muted: #4a7a8a;
+  --muted2: #2a4a5a;
+  --warn: #fb923c;
+  --danger: #f87171;
+  --grad: linear-gradient(135deg, var(--g1), var(--g2), var(--g3));
+  --grad-soft: linear-gradient(135deg, rgba(74,222,128,0.15), rgba(34,211,238,0.15), rgba(59,130,246,0.15));
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  font-family: 'Syne', 'Noto Sans SC', sans-serif;
+  color: var(--text);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ── App Shell ── */
+.app-shell {
+  width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Ambient background ── */
+.ambient {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+.amb1 { width: 300px; height: 300px; background: rgba(74,222,128,0.04); top: -100px; left: -80px; }
+.amb2 { width: 250px; height: 250px; background: rgba(59,130,246,0.05); bottom: 100px; right: -60px; }
+.amb3 { width: 200px; height: 200px; background: rgba(34,211,238,0.03); top: 40%; left: 30%; }
+
+/* ── Status bar ── */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px 6px;
+  position: relative; z-index: 2;
+  flex-shrink: 0;
+}
+.status-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.status-right { display: flex; gap: 5px; align-items: center; }
+.sig-bar {
+  width: 3px; border-radius: 1px;
+  background: var(--g2);
+}
+
+/* ── Top header ── */
+.top-header {
+  padding: 6px 20px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative; z-index: 2;
+  flex-shrink: 0;
+}
+.logo {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.logo-sub {
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  margin-top: 1px;
+}
+.device-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg2);
+  border: 0.5px solid var(--border2);
+  border-radius: 20px;
+  padding: 5px 10px;
+}
+.device-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--g1);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(74,222,128,0.3)}
+  50%{opacity:0.7;box-shadow:0 0 0 4px rgba(74,222,128,0)}
+}
+.device-name { font-size: 9px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+/* ── Screen container ── */
+.screens-wrap {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+.screens-inner {
+  display: flex;
+  height: 100%;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.screen {
+  min-width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 16px 100px;
+  scrollbar-width: none;
+}
+.screen::-webkit-scrollbar { display: none; }
+
+/* ── Nav bar ── */
+.nav-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(6,11,15,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 0.5px solid var(--border);
+  display: flex;
+  padding: 8px 0 20px;
+  z-index: 10;
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: opacity 0.2s;
+}
+.nav-item:active { opacity: 0.6; }
+.nav-icon-wrap {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.nav-item.active .nav-icon-wrap {
+  background: var(--grad-soft);
+  border: 0.5px solid rgba(34,211,238,0.2);
+}
+.nav-icon {
+  width: 16px; height: 16px;
+}
+.nav-label-en { font-size: 8px; font-family: 'DM Mono', monospace; }
+.nav-label-zh { font-size: 8px; font-family: 'Noto Sans SC', sans-serif; font-weight: 300; }
+.nav-item.active .nav-label-en,
+.nav-item.active .nav-label-zh {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.nav-item:not(.active) .nav-label-en,
+.nav-item:not(.active) .nav-label-zh { color: var(--muted2); }
+.nav-item:not(.active) .nav-icon-wrap svg { opacity: 0.3; }
+
+/* ── Cards ── */
+.card {
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.card-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.card-title-en {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.card-title-zh {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  margin-top: 1px;
+}
+.badge {
+  font-size: 8px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+}
+.badge-ok { background: rgba(74,222,128,0.1); border: 0.5px solid rgba(74,222,128,0.2); color: var(--g1); }
+.badge-warn { background: rgba(251,146,60,0.1); border: 0.5px solid rgba(251,146,60,0.2); color: var(--warn); }
+.badge-blue { background: rgba(59,130,246,0.1); border: 0.5px solid rgba(59,130,246,0.2); color: var(--g3); }
+
+/* ══════════ SCREEN 1: DASHBOARD ══════════ */
+.hr-ring-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0 4px;
+}
+.hr-ring {
+  position: relative;
+  width: 150px; height: 150px;
+  display: flex; align-items: center; justify-content: center;
+}
+.hr-ring svg { position: absolute; inset: 0; }
+.hr-center { text-align: center; }
+.hr-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 42px;
+  font-weight: 300;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+.hr-unit {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.hr-label-zh {
+  font-size: 10px;
+  color: var(--muted2);
+  font-family: 'Noto Sans SC', sans-serif;
+  margin-top: 1px;
+}
+
+.live-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 8px auto;
+  width: fit-content;
+  background: var(--bg3);
+  border: 0.5px solid var(--border2);
+  border-radius: 20px;
+  padding: 5px 14px;
+}
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--g1);
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+.live-en { font-size: 9px; font-family: 'DM Mono', monospace; color: var(--g1); letter-spacing: 0.8px; }
+.live-zh { font-size: 9px; font-family: 'Noto Sans SC', sans-serif; color: var(--muted); font-weight: 300; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.stat-cell {
+  background: var(--bg3);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 8px;
+  text-align: center;
+}
+.stat-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 20px;
+  font-weight: 400;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.stat-en { font-size: 8px; color: var(--muted2); letter-spacing: 0.3px; line-height: 1.3; }
+.stat-zh { font-size: 8px; color: var(--muted2); font-family: 'Noto Sans SC', sans-serif; font-weight: 300; }
+
+.power-section { margin-bottom: 10px; }
+.power-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.power-label-group { }
+.power-en { font-size: 9px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
+.power-zh { font-size: 9px; color: var(--muted2); font-family: 'Noto Sans SC', sans-serif; font-weight: 300; }
+.power-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 16px;
+  font-weight: 400;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.bar-track {
+  height: 5px;
+  background: var(--bg3);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--grad);
+  transition: width 1s ease;
+}
+.bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: var(--muted2);
+}
+
+.spo2-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg3);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+}
+.spo2-icon { font-size: 18px; }
+.spo2-info { flex: 1; }
+.spo2-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--g3);
+  line-height: 1;
+}
+.spo2-en { font-size: 8px; color: var(--muted2); font-family: 'DM Mono', monospace; }
+.spo2-zh { font-size: 8px; color: var(--muted2); font-family: 'Noto Sans SC', sans-serif; font-weight: 300; }
+
+/* ══════════ SCREEN 2: TRENDS ══════════ */
+.time-tabs {
+  display: flex;
+  gap: 4px;
+}
+.time-tab {
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  padding: 3px 8px;
+  border-radius: 8px;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 0.5px solid transparent;
+}
+.time-tab.active {
+  background: var(--grad-soft);
+  border-color: rgba(34,211,238,0.2);
+  color: var(--g2);
+}
+
+.chart-box {
+  background: var(--bg3);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+  position: relative;
+}
+.chart-threshold {
+  position: absolute;
+  left: 32px; right: 12px;
+  height: 0.5px;
+  background: rgba(251,146,60,0.4);
+  top: 32px;
+}
+.chart-threshold-label {
+  position: absolute;
+  right: 14px; top: 22px;
+  font-size: 8px;
+  color: rgba(251,146,60,0.7);
+  font-family: 'DM Mono', monospace;
+}
+.chart-y-labels {
+  position: absolute;
+  left: 10px; top: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 90px;
+}
+.y-lbl {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: var(--muted2);
+}
+.chart-svg-wrap {
+  margin-left: 26px;
+  margin-top: 8px;
+}
+
+.events-title {
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  color: var(--muted);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.events-title-zh {
+  font-size: 9px;
+  font-family: 'Noto Sans SC', sans-serif;
+  color: var(--muted2);
+  font-weight: 300;
+}
+
+.event-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--bg3);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 6px;
+}
+.ev-indicator {
+  width: 2px;
+  height: 32px;
+  border-radius: 1px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.ev-indicator.warn { background: var(--warn); }
+.ev-indicator.ok { background: var(--g1); }
+.ev-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  width: 38px;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+.ev-body { flex: 1; }
+.ev-en { font-size: 10px; color: var(--text); font-weight: 500; line-height: 1.3; }
+.ev-zh { font-size: 9px; color: var(--muted); font-family: 'Noto Sans SC', sans-serif; font-weight: 300; }
+.ev-val-col { text-align: right; flex-shrink: 0; }
+.ev-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.ev-val.warn { color: var(--warn); }
+.ev-val.ok { color: var(--g1); }
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.sum-cell {
+  background: var(--bg3);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+}
+.sum-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 400;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.sum-en { font-size: 9px; color: var(--muted2); font-family: 'DM Mono', monospace; }
+.sum-zh { font-size: 9px; color: var(--muted2); font-family: 'Noto Sans SC', sans-serif; font-weight: 300; }
+
+/* ══════════ SCREEN 3: SETTINGS ══════════ */
+.profile-card {
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.profile-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--grad-soft);
+  opacity: 0.5;
+}
+.avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--grad);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #060b0f;
+  flex-shrink: 0;
+  position: relative;
+}
+.profile-info { flex: 1; position: relative; }
+.profile-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.profile-plan-en { font-size: 9px; font-family: 'DM Mono', monospace; color: var(--muted); margin-top: 2px; }
+.profile-plan-zh { font-size: 9px; font-family: 'Noto Sans SC', sans-serif; color: var(--muted2); font-weight: 300; }
+.profile-day {
+  position: relative;
+  text-align: right;
+}
+.day-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 24px;
+  font-weight: 300;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+.day-label-en { font-size: 8px; font-family: 'DM Mono', monospace; color: var(--muted); }
+.day-label-zh { font-size: 8px; font-family: 'Noto Sans SC', sans-serif; color: var(--muted2); font-weight: 300; }
+
+.section-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted2);
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 8px;
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.section-label-zh {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 9px;
+  color: var(--muted2);
+}
+
+.slider-card {
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+.slider-label-en { font-size: 11px; font-weight: 500; color: var(--text); }
+.slider-label-zh { font-size: 9px; font-family: 'Noto Sans SC', sans-serif; color: var(--muted); font-weight: 300; }
+.slider-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 16px;
+  font-weight: 400;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: right;
+}
+.slider-value-unit { font-size: 10px; }
+
+.slider-track {
+  height: 4px;
+  background: var(--bg3);
+  border-radius: 2px;
+  position: relative;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+.slider-fill-grad {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--grad);
+  pointer-events: none;
+}
+.slider-thumb {
+  position: absolute;
+  top: -8px;
+  width: 20px; height: 20px;
+  background: var(--bg);
+  border: 2px solid var(--g2);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  cursor: grab;
+  box-shadow: 0 0 8px rgba(34,211,238,0.3);
+  transition: box-shadow 0.2s;
+}
+.slider-thumb:active { cursor: grabbing; box-shadow: 0 0 16px rgba(34,211,238,0.5); }
+.slider-range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: var(--muted2);
+}
+
+.toggle-card {
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+.toggle-info { flex: 1; }
+.toggle-label-en { font-size: 11px; font-weight: 500; color: var(--text); }
+.toggle-label-zh { font-size: 9px; font-family: 'Noto Sans SC', sans-serif; color: var(--muted); font-weight: 300; }
+.toggle-switch {
+  width: 38px; height: 22px;
+  border-radius: 11px;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.3s;
+  cursor: pointer;
+}
+.toggle-switch.on { background: linear-gradient(90deg, rgba(74,222,128,0.3), rgba(34,211,238,0.3)); border: 0.5px solid rgba(34,211,238,0.4); }
+.toggle-switch.off { background: var(--bg3); border: 0.5px solid var(--border2); }
+.toggle-knob {
+  position: absolute;
+  top: 3px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+.toggle-switch.on .toggle-knob { left: 19px; background: var(--g2); box-shadow: 0 0 6px rgba(34,211,238,0.4); }
+.toggle-switch.off .toggle-knob { left: 3px; background: var(--muted2); }
+
+/* Demo trigger button */
+.demo-trigger-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid;
+  border-image: linear-gradient(135deg, var(--g1), var(--g2), var(--g3)) 1;
+  border-radius: 14px;
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  margin-top: 14px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+.demo-trigger-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--grad-soft);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.demo-trigger-btn:active::before { opacity: 1; }
+.demo-btn-en {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+}
+.demo-btn-zh {
+  font-size: 10px;
+  font-family: 'Noto Sans SC', sans-serif;
+  color: var(--muted);
+  font-weight: 300;
+  margin-top: 2px;
+  position: relative;
+}
+
+/* ── Toast notification ── */
+.toast {
+  position: fixed;
+  top: 80px;
+  left: 50%; transform: translateX(-50%);
+  background: var(--bg2);
+  border: 0.5px solid rgba(251,146,60,0.4);
+  border-radius: 16px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 100;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events: none;
+  min-width: 260px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.toast-icon { font-size: 18px; }
+.toast-text-en { font-size: 11px; font-weight: 600; color: var(--warn); }
+.toast-text-zh { font-size: 10px; font-family: 'Noto Sans SC', sans-serif; color: var(--muted); font-weight: 300; }
+
+/* ── Animate numbers ── */
+@keyframes countUp { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform: translateY(0); } }
+.stat-num, .hr-num { animation: countUp 0.6s ease both; }
+
+/* ── Wave animation on ring ── */
+@keyframes ring-spin {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -251; }
+}
+</style>
+</head>
+<body>
+
+<div class="ambient amb1"></div>
+<div class="ambient amb2"></div>
+<div class="ambient amb3"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-icon">⚡</div>
+  <div>
+    <div class="toast-text-en">Power limited — HR 102bpm</div>
+    <div class="toast-text-zh">心率超标，功率已自动限制至 4.0W</div>
+  </div>
+</div>
+
+<div class="app-shell">
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <div class="status-time" id="clock">09:41</div>
+    <div class="status-right">
+      <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
+        <rect x="0" y="6" width="3" height="4" rx="0.5" fill="#4ade80" opacity="0.4"/>
+        <rect x="4" y="3" width="3" height="7" rx="0.5" fill="#22d3ee" opacity="0.6"/>
+        <rect x="8" y="1" width="3" height="9" rx="0.5" fill="#3b82f6" opacity="0.8"/>
+        <rect x="12" y="0" width="3" height="10" rx="0.5" fill="#3b82f6"/>
+      </svg>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M6 1C8.761 1 11 3.239 11 6S8.761 11 6 11 1 8.761 1 6 3.239 1 6 1z" stroke="#3b82f6" stroke-width="0.8"/>
+        <path d="M3 6h6M6 3v6" stroke="#3b82f6" stroke-width="0.8" opacity="0.5"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Top header -->
+  <div class="top-header">
+    <div>
+      <div class="logo">NYMIC</div>
+      <div class="logo-sub">Smart Nicotine Mgmt · 智能尼古丁管理</div>
+    </div>
+    <div class="device-pill">
+      <div class="device-dot"></div>
+      <span class="device-name">NM-01 · Connected</span>
+    </div>
+  </div>
+
+  <!-- Screen container -->
+  <div class="screens-wrap">
+    <div class="screens-inner" id="screensInner">
+
+      <!-- ══ SCREEN 1: DASHBOARD ══ -->
+      <div class="screen" id="screen0">
+
+        <!-- Heart Rate Ring -->
+        <div class="card">
+          <div class="card-title-row">
+            <div>
+              <div class="card-title-en">Heart Rate Monitor</div>
+              <div class="card-title-zh">实时心率监测</div>
+            </div>
+            <div class="badge badge-ok" id="hr-status-badge">Normal · 正常</div>
+          </div>
+
+          <div class="hr-ring-wrap">
+            <div class="hr-ring">
+              <svg viewBox="0 0 150 150" width="150" height="150">
+                <defs>
+                  <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#4ade80"/>
+                    <stop offset="50%" stop-color="#22d3ee"/>
+                    <stop offset="100%" stop-color="#3b82f6"/>
+                  </linearGradient>
+                </defs>
+                <!-- Track -->
+                <circle cx="75" cy="75" r="60" fill="none" stroke="#1a2d3a" stroke-width="6"/>
+                <!-- Tick marks -->
+                <circle cx="75" cy="75" r="60" fill="none" stroke="#243b4a" stroke-width="1"
+                  stroke-dasharray="2 14.8" stroke-dashoffset="0"/>
+                <!-- Progress -->
+                <circle cx="75" cy="75" r="60" fill="none" stroke="url(#ringGrad)" stroke-width="6"
+                  stroke-dasharray="283 94" stroke-dashoffset="90"
+                  stroke-linecap="round" id="hrRing"/>
+                <!-- Pulse dots -->
+                <circle cx="75" cy="15" r="4" fill="#4ade80" opacity="0.6">
+                  <animate attributeName="opacity" values="0.6;1;0.6" dur="1.5s" repeatCount="indefinite"/>
+                </circle>
+              </svg>
+              <div class="hr-center">
+                <div class="hr-num" id="hr-num">72</div>
+                <div class="hr-unit">bpm</div>
+                <div class="hr-label-zh">心率</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="live-pill">
+            <div class="live-dot"></div>
+            <span class="live-en">MONITORING</span>
+            <span class="live-zh">监测中</span>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-cell">
+            <div class="stat-num" id="puffs-num">14</div>
+            <div class="stat-en">Puffs today</div>
+            <div class="stat-zh">今日抽吸</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-num">6.2<span style="font-size:12px">W</span></div>
+            <div class="stat-en">Avg. power</div>
+            <div class="stat-zh">平均功率</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-num">2<span style="font-size:12px">x</span></div>
+            <div class="stat-en">Auto-limits</div>
+            <div class="stat-zh">自动限制</div>
+          </div>
+        </div>
+
+        <!-- Power output -->
+        <div class="card power-section">
+          <div class="card-title-row">
+            <div>
+              <div class="card-title-en">Power Output</div>
+              <div class="card-title-zh">当前功率输出</div>
+            </div>
+          </div>
+          <div class="power-row">
+            <div class="power-label-group">
+              <div class="power-en">Current · 当前</div>
+            </div>
+            <div class="power-val" id="power-val">6.2 W</div>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" id="power-bar" style="width:62%"></div>
+          </div>
+          <div class="bar-labels">
+            <span>0W</span><span>5W</span><span>10W</span>
+          </div>
+        </div>
+
+        <!-- SpO2 -->
+        <div class="spo2-row">
+          <div class="spo2-icon">🩺</div>
+          <div class="spo2-info">
+            <div class="spo2-val">97<span style="font-size:12px">%</span></div>
+            <div class="spo2-en">Blood Oxygen · SpO₂</div>
+            <div class="spo2-zh">血氧饱和度</div>
+          </div>
+          <div class="badge badge-blue">Optimal · 优良</div>
+        </div>
+
+      </div>
+
+      <!-- ══ SCREEN 2: TRENDS ══ -->
+      <div class="screen" id="screen1">
+
+        <!-- Chart card -->
+        <div class="card">
+          <div class="card-title-row">
+            <div>
+              <div class="card-title-en">Heart Rate Trend</div>
+              <div class="card-title-zh">心率趋势</div>
+            </div>
+            <div class="time-tabs">
+              <div class="time-tab active">1H</div>
+              <div class="time-tab">6H</div>
+              <div class="time-tab">24H</div>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="chart-threshold-label">Limit 95bpm</div>
+            <div class="chart-threshold" style="top:34px"></div>
+            <div class="chart-y-labels">
+              <span class="y-lbl">110</span>
+              <span class="y-lbl">85</span>
+              <span class="y-lbl">60</span>
+            </div>
+            <div class="chart-svg-wrap">
+              <svg viewBox="0 0 280 100" width="100%" height="100">
+                <defs>
+                  <linearGradient id="chartGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#4ade80"/>
+                    <stop offset="50%" stop-color="#22d3ee"/>
+                    <stop offset="100%" stop-color="#3b82f6"/>
+                  </linearGradient>
+                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.2"/>
+                    <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <!-- Grid -->
+                <line x1="0" y1="10" x2="280" y2="10" stroke="#1a2d3a" stroke-width="0.5"/>
+                <line x1="0" y1="45" x2="280" y2="45" stroke="#1a2d3a" stroke-width="0.5"/>
+                <line x1="0" y1="80" x2="280" y2="80" stroke="#1a2d3a" stroke-width="0.5"/>
+                <!-- Area fill -->
+                <path d="M0,65 C20,60 35,55 55,50 C70,46 75,15 90,12 C105,9 110,50 130,58 C150,65 165,55 185,46 C200,38 210,8 230,5 C248,2 260,40 280,60 L280,100 L0,100 Z"
+                  fill="url(#areaGrad)"/>
+                <!-- Main line -->
+                <path d="M0,65 C20,60 35,55 55,50 C70,46 75,15 90,12 C105,9 110,50 130,58 C150,65 165,55 185,46 C200,38 210,8 230,5 C248,2 260,40 280,60"
+                  fill="none" stroke="url(#chartGrad)" stroke-width="2" stroke-linecap="round"/>
+                <!-- Spike 1 -->
+                <circle cx="82" cy="12" r="4" fill="#fb923c"/>
+                <line x1="82" y1="0" x2="82" y2="12" stroke="#fb923c" stroke-width="0.5" stroke-dasharray="2 2"/>
+                <!-- Spike 2 -->
+                <circle cx="228" cy="5" r="4" fill="#fb923c"/>
+                <line x1="228" y1="0" x2="228" y2="5" stroke="#fb923c" stroke-width="0.5" stroke-dasharray="2 2"/>
+                <!-- Current point -->
+                <circle cx="280" cy="60" r="4" fill="#3b82f6"/>
+                <circle cx="280" cy="60" r="7" fill="#3b82f6" opacity="0.2">
+                  <animate attributeName="r" values="4;9;4" dur="2s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite"/>
+                </circle>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Events -->
+        <div style="margin-bottom:8px;">
+          <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:8px;">
+            <div class="events-title">Auto-limit Events</div>
+            <div class="events-title-zh">自动限制记录</div>
+          </div>
+
+          <div class="event-row">
+            <div class="ev-indicator warn"></div>
+            <div class="ev-time">09:12</div>
+            <div class="ev-body">
+              <div class="ev-en">Heart rate exceeded limit</div>
+              <div class="ev-zh">心率超标 → 功率自动降至 4.0W</div>
+            </div>
+            <div class="ev-val-col">
+              <div class="ev-val warn">102 bpm</div>
+              <div style="font-size:8px;color:var(--muted2);font-family:'DM Mono',monospace;">→ 4.0W</div>
+            </div>
+          </div>
+
+          <div class="event-row">
+            <div class="ev-indicator ok"></div>
+            <div class="ev-time">09:18</div>
+            <div class="ev-body">
+              <div class="ev-en">Restored to normal power</div>
+              <div class="ev-zh">心率恢复正常 → 功率恢复至 6.2W</div>
+            </div>
+            <div class="ev-val-col">
+              <div class="ev-val ok">82 bpm</div>
+              <div style="font-size:8px;color:var(--muted2);font-family:'DM Mono',monospace;">→ 6.2W</div>
+            </div>
+          </div>
+
+          <div class="event-row">
+            <div class="ev-indicator warn"></div>
+            <div class="ev-time">09:34</div>
+            <div class="ev-body">
+              <div class="ev-en">Heart rate exceeded limit</div>
+              <div class="ev-zh">心率超标 → 功率自动降至 4.0W</div>
+            </div>
+            <div class="ev-val-col">
+              <div class="ev-val warn">108 bpm</div>
+              <div style="font-size:8px;color:var(--muted2);font-family:'DM Mono',monospace;">→ 4.0W</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary-grid">
+          <div class="sum-cell">
+            <div class="sum-num">↓18%</div>
+            <div class="sum-en">vs yesterday</div>
+            <div class="sum-zh">较昨日减少</div>
+          </div>
+          <div class="sum-cell">
+            <div class="sum-num">2x</div>
+            <div class="sum-en">Auto-limits today</div>
+            <div class="sum-zh">今日自动限制</div>
+          </div>
+          <div class="sum-cell">
+            <div class="sum-num">14</div>
+            <div class="sum-en">Total puffs</div>
+            <div class="sum-zh">今日总计</div>
+          </div>
+          <div class="sum-cell">
+            <div class="sum-num">Day 14</div>
+            <div class="sum-en">Reduction plan</div>
+            <div class="sum-zh">减量计划第14天</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ══ SCREEN 3: SETTINGS ══ -->
+      <div class="screen" id="screen2">
+
+        <!-- Profile -->
+        <div class="profile-card">
+          <div class="avatar">YS</div>
+          <div class="profile-info">
+            <div class="profile-name">Yu Siyang</div>
+            <div class="profile-plan-en">Reduction Plan · Active</div>
+            <div class="profile-plan-zh">减量计划进行中</div>
+          </div>
+          <div class="profile-day">
+            <div class="day-num">14</div>
+            <div class="day-label-en">Day</div>
+            <div class="day-label-zh">天</div>
+          </div>
+        </div>
+
+        <!-- Threshold settings -->
+        <div class="section-label">
+          Thresholds · <span class="section-label-zh">阈值设置</span>
+        </div>
+
+        <div class="slider-card">
+          <div class="slider-header">
+            <div>
+              <div class="slider-label-en">Heart Rate Trigger</div>
+              <div class="slider-label-zh">心率触发阈值</div>
+            </div>
+            <div class="slider-value" id="hr-val-display">95 <span class="slider-value-unit">bpm</span></div>
+          </div>
+          <div class="slider-track" id="hrSliderTrack">
+            <div class="slider-fill-grad" id="hrSliderFill" style="width:52.5%"></div>
+            <div class="slider-thumb" id="hrSliderThumb" style="left:52.5%"></div>
+          </div>
+          <div class="slider-range-labels"><span>60 bpm</span><span>100 bpm</span><span>140 bpm</span></div>
+        </div>
+
+        <div class="slider-card">
+          <div class="slider-header">
+            <div>
+              <div class="slider-label-en">Limited Power Output</div>
+              <div class="slider-label-zh">触发后功率上限</div>
+            </div>
+            <div class="slider-value" id="pw-val-display">4.0 <span class="slider-value-unit">W</span></div>
+          </div>
+          <div class="slider-track" id="pwSliderTrack">
+            <div class="slider-fill-grad" id="pwSliderFill" style="width:30%"></div>
+            <div class="slider-thumb" id="pwSliderThumb" style="left:30%"></div>
+          </div>
+          <div class="slider-range-labels"><span>1W</span><span>5.5W</span><span>10W</span></div>
+        </div>
+
+        <!-- Toggles -->
+        <div class="section-label">
+          Alerts · <span class="section-label-zh">提醒设置</span>
+        </div>
+
+        <div class="toggle-card" onclick="toggleSwitch(this)">
+          <div class="toggle-info">
+            <div class="toggle-label-en">Haptic on limit trigger</div>
+            <div class="toggle-label-zh">触发限制时震动提醒</div>
+          </div>
+          <div class="toggle-switch on"><div class="toggle-knob"></div></div>
+        </div>
+
+        <div class="toggle-card" onclick="toggleSwitch(this)">
+          <div class="toggle-info">
+            <div class="toggle-label-en">Daily usage report</div>
+            <div class="toggle-label-zh">每日使用报告</div>
+          </div>
+          <div class="toggle-switch on"><div class="toggle-knob"></div></div>
+        </div>
+
+        <div class="toggle-card" onclick="toggleSwitch(this)">
+          <div class="toggle-info">
+            <div class="toggle-label-en">Apple Watch pairing</div>
+            <div class="toggle-label-zh">Apple Watch 配对</div>
+          </div>
+          <div class="toggle-switch off"><div class="toggle-knob"></div></div>
+        </div>
+
+        <div class="toggle-card" onclick="toggleSwitch(this)">
+          <div class="toggle-info">
+            <div class="toggle-label-en">Weekly reduction goal</div>
+            <div class="toggle-label-zh">每周减量目标提醒</div>
+          </div>
+          <div class="toggle-switch on"><div class="toggle-knob"></div></div>
+        </div>
+
+        <!-- Demo trigger -->
+        <div class="demo-trigger-btn" onclick="triggerDemo()">
+          <div class="demo-btn-en">⚡ Simulate HR Trigger</div>
+          <div class="demo-btn-zh">模拟心率超标 · 功率自动限制演示</div>
+        </div>
+
+      </div>
+    </div><!-- end screens-inner -->
+  </div><!-- end screens-wrap -->
+
+  <!-- Nav bar -->
+  <div class="nav-bar">
+
+    <div class="nav-item active" onclick="goTo(0)" id="nav0">
+      <div class="nav-icon-wrap">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="8" stroke="url(#ng)" stroke-width="1.5"/>
+          <path d="M12 8v4l2 2" stroke="url(#ng)" stroke-width="1.5" stroke-linecap="round"/>
+          <defs><linearGradient id="ng" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4ade80"/><stop offset="1" stop-color="#3b82f6"/></linearGradient></defs>
+        </svg>
+      </div>
+      <div class="nav-label-en">Home</div>
+      <div class="nav-label-zh">主页</div>
+    </div>
+
+    <div class="nav-item" onclick="goTo(1)" id="nav1">
+      <div class="nav-icon-wrap">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+          <polyline points="3,17 8,11 13,14 21,6" stroke="#4a7a8a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="21" cy="6" r="2" fill="#4a7a8a"/>
+        </svg>
+      </div>
+      <div class="nav-label-en">Trends</div>
+      <div class="nav-label-zh">趋势</div>
+    </div>
+
+    <div class="nav-item" onclick="goTo(2)" id="nav2">
+      <div class="nav-icon-wrap">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="8" r="3" stroke="#4a7a8a" stroke-width="1.5"/>
+          <path d="M6 20v-1a6 6 0 0 1 12 0v1" stroke="#4a7a8a" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M18 10h2M20 12h-2" stroke="#4a7a8a" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="nav-label-en">Settings</div>
+      <div class="nav-label-zh">设置</div>
+    </div>
+
+  </div>
+
+</div><!-- end app-shell -->
+
+<script>
+// ── Clock ──
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent = h + ':' + m;
+}
+updateClock();
+setInterval(updateClock, 30000);
+
+// ── Navigation ──
+let currentScreen = 0;
+function goTo(idx) {
+  currentScreen = idx;
+  document.getElementById('screensInner').style.transform = `translateX(-${idx * 100}%)`;
+  [0,1,2].forEach(i => {
+    document.getElementById('nav'+i).classList.toggle('active', i === idx);
+  });
+  // update nav icons stroke color
+  updateNavIcons();
+}
+function updateNavIcons() {
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach((item, i) => {
+    const paths = item.querySelectorAll('polyline, circle:not(.nav-icon-wrap circle), path');
+    const isActive = i === currentScreen;
+    paths.forEach(el => {
+      el.setAttribute('stroke', isActive ? 'url(#ng)' : '#4a7a8a');
+    });
+  });
+}
+
+// ── Simulated live HR ──
+let baseHR = 72;
+let demoMode = false;
+function animateHR() {
+  if (demoMode) return;
+  const jitter = Math.round((Math.random() - 0.5) * 4);
+  baseHR = Math.max(65, Math.min(80, baseHR + jitter));
+  document.getElementById('hr-num').textContent = baseHR;
+  // Update ring arc
+  const pct = (baseHR - 40) / 160;
+  const circumference = 2 * Math.PI * 60;
+  const arc = circumference * pct;
+  document.getElementById('hrRing').setAttribute('stroke-dasharray', `${arc} ${circumference - arc}`);
+  setTimeout(animateHR, 1800);
+}
+animateHR();
+
+// ── Demo trigger ──
+function triggerDemo() {
+  if (demoMode) return;
+  demoMode = true;
+
+  // Update HR to spike
+  document.getElementById('hr-num').textContent = '102';
+  document.getElementById('hr-status-badge').textContent = 'Limit Active · 限制中';
+  document.getElementById('hr-status-badge').className = 'badge badge-warn';
+
+  // Animate ring to warn color
+  const ring = document.getElementById('hrRing');
+  ring.setAttribute('stroke', '#fb923c');
+  ring.removeAttribute('stroke');
+  // set dasharray for 102
+  const pct = (102 - 40) / 160;
+  const circumference = 2 * Math.PI * 60;
+  const arc = circumference * pct;
+  ring.setAttribute('stroke-dasharray', `${arc} ${circumference - arc}`);
+
+  // Power drop
+  document.getElementById('power-val').textContent = '4.0 W';
+  document.getElementById('power-bar').style.width = '40%';
+  document.getElementById('power-bar').style.background = 'linear-gradient(90deg, #fb923c, #f87171)';
+
+  // Show toast
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+
+  // Puff count tick
+  const puffEl = document.getElementById('puffs-num');
+  const curr = parseInt(puffEl.textContent);
+  puffEl.textContent = curr + 1;
+
+  // Auto-recover after 3.5s
+  setTimeout(() => {
+    toast.classList.remove('show');
+
+    setTimeout(() => {
+      demoMode = false;
+      baseHR = 74;
+      document.getElementById('hr-num').textContent = '74';
+      document.getElementById('hr-status-badge').textContent = 'Normal · 正常';
+      document.getElementById('hr-status-badge').className = 'badge badge-ok';
+      document.getElementById('power-val').textContent = '6.2 W';
+      document.getElementById('power-bar').style.width = '62%';
+      document.getElementById('power-bar').style.background = 'linear-gradient(135deg, #4ade80, #22d3ee, #3b82f6)';
+      animateHR();
+    }, 600);
+  }, 3500);
+}
+
+// ── Toggle switches ──
+function toggleSwitch(card) {
+  const sw = card.querySelector('.toggle-switch');
+  sw.classList.toggle('on');
+  sw.classList.toggle('off');
+}
+
+// ── Sliders ──
+function initSlider(trackId, fillId, thumbId, displayId, minVal, maxVal, initVal, unit, decimals) {
+  const track = document.getElementById(trackId);
+  const fill = document.getElementById(fillId);
+  const thumb = document.getElementById(thumbId);
+  const display = document.getElementById(displayId);
+  let dragging = false;
+
+  function setPercent(pct) {
+    pct = Math.max(0, Math.min(1, pct));
+    const val = minVal + pct * (maxVal - minVal);
+    fill.style.width = (pct * 100) + '%';
+    thumb.style.left = (pct * 100) + '%';
+    display.innerHTML = val.toFixed(decimals) + ' <span class="slider-value-unit">' + unit + '</span>';
+  }
+
+  function getPercent(e) {
+    const rect = track.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    return (clientX - rect.left) / rect.width;
+  }
+
+  track.addEventListener('touchstart', e => { dragging = true; setPercent(getPercent(e)); e.preventDefault(); }, {passive:false});
+  document.addEventListener('touchmove', e => { if(dragging) { setPercent(getPercent(e)); e.preventDefault(); } }, {passive:false});
+  document.addEventListener('touchend', () => dragging = false);
+  track.addEventListener('mousedown', e => { dragging = true; setPercent(getPercent(e)); });
+  document.addEventListener('mousemove', e => { if(dragging) setPercent(getPercent(e)); });
+  document.addEventListener('mouseup', () => dragging = false);
+
+  // init
+  const initPct = (initVal - minVal) / (maxVal - minVal);
+  setPercent(initPct);
+}
+
+initSlider('hrSliderTrack','hrSliderFill','hrSliderThumb','hr-val-display', 60, 140, 95, 'bpm', 0);
+initSlider('pwSliderTrack','pwSliderFill','pwSliderThumb','pw-val-display', 1, 10, 4.0, 'W', 1);
+
+// ── Time tabs ──
+document.querySelectorAll('.time-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.time-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+  });
+});
+
+// ── Swipe gesture ──
+let touchStartX = 0;
+const screensWrap = document.querySelector('.screens-wrap');
+screensWrap.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive:true});
+screensWrap.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 60) {
+    if (dx < 0 && currentScreen < 2) goTo(currentScreen + 1);
+    else if (dx > 0 && currentScreen > 0) goTo(currentScreen - 1);
+  }
+}, {passive:true});
+</script>
+</body>
+</html>
