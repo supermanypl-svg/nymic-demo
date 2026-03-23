@@ -58,6 +58,8 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
 @keyframes spin{to{transform:rotate(360deg)}}
 .conn-inner{font-size:28px;animation:counter-spin 1s linear infinite}
 @keyframes counter-spin{to{transform:rotate(-360deg)}}
+@keyframes pr{0%{transform:scale(1);opacity:0.6}100%{transform:scale(1.5);opacity:0}}
+@keyframes glow-pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,211,238,0.15)}50%{box-shadow:0 0 16px 4px rgba(34,211,238,0.1)}}
 .conn-title{font-size:16px;font-weight:500;color:var(--text);margin-bottom:6px}
 .conn-sub{font-size:12px;color:var(--muted)}
 
@@ -282,7 +284,7 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
 <!-- ══ SETUP ══ -->
 <div class="page shell hidden" id="pg-setup">
   <div class="setup-top">
-    <div class="setup-step">STEP 1 OF 1 · 第一步</div>
+    <div class="setup-step">STEP 1 OF 2 · 第一步，共两步</div>
     <div class="setup-title">选择可穿戴设备<br><span style="font-size:13px;font-weight:400;color:#4a7a8a">Choose your wearable device</span></div>
     <div class="setup-sub">NYMIC 将从这里读取你的心率与血氧数据<br><span style="color:#2a4a5a">Heart rate &amp; SpO₂ will be read from this device</span></div>
   </div>
@@ -321,19 +323,61 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
     </div>
   </div>
   <div class="setup-foot">
-    <button class="btn-main" onclick="goConnecting()">
-      下一步，连接设备
-      <span class="zh">Next · Connect device</span>
+    <button class="btn-main" onclick="goConnectWatch()">
+      下一步，连接手环 / 手表
+      <span class="zh">Next · Connect wearable</span>
     </button>
   </div>
 </div>
 
-<!-- ══ CONNECTING ══ -->
+<!-- ══ CONNECTING WEARABLE ══ -->
 <div class="page shell hidden" id="pg-conn">
   <div style="position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px 28px;text-align:center">
+    <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1.5px;margin-bottom:28px">STEP 1 OF 2 · 连接可穿戴设备</div>
     <div class="conn-ring"><div class="conn-inner">⌚</div></div>
-    <div class="conn-title" id="conn-title">正在搜索设备…</div>
+    <div class="conn-title" id="conn-title">正在搜索手环…</div>
     <div class="conn-sub" id="conn-sub">请确保蓝牙已开启 · Searching nearby</div>
+  </div>
+</div>
+
+<!-- ══ CONNECTING NYMIC DEVICE ══ -->
+<div class="page shell hidden" id="pg-conn-device">
+  <div style="position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px 28px;text-align:center">
+
+    <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1.5px;margin-bottom:28px">STEP 2 OF 2 · 连接 NYMIC 设备</div>
+
+    <!-- Watch connected badge -->
+    <div style="display:flex;align-items:center;gap:8px;background:rgba(74,222,128,0.08);border:0.5px solid rgba(74,222,128,0.2);border-radius:20px;padding:6px 14px;margin-bottom:32px">
+      <div style="width:7px;height:7px;border-radius:50%;background:var(--g1)"></div>
+      <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--g1)" id="watch-badge">手环已连接 · Wearable connected</span>
+    </div>
+
+    <!-- NYMIC device animation -->
+    <div style="position:relative;width:96px;height:96px;margin:0 auto 24px">
+      <!-- Outer pulse rings -->
+      <div style="position:absolute;inset:-16px;border-radius:50%;border:0.5px solid rgba(34,211,238,0.15);animation:pr 2s ease-out infinite"></div>
+      <div style="position:absolute;inset:-8px;border-radius:50%;border:0.5px solid rgba(34,211,238,0.2);animation:pr 2s ease-out infinite 0.4s"></div>
+      <!-- Main circle -->
+      <div style="width:96px;height:96px;border-radius:50%;background:rgba(34,211,238,0.06);border:1.5px solid rgba(34,211,238,0.3);display:flex;align-items:center;justify-content:center;animation:glow-pulse 2s ease-in-out infinite">
+        <!-- NYMIC device icon — vape silhouette using SVG -->
+        <svg width="36" height="48" viewBox="0 0 36 48" fill="none">
+          <rect x="13" y="2" width="10" height="5" rx="2" fill="rgba(34,211,238,0.4)"/>
+          <rect x="11" y="7" width="14" height="34" rx="5" fill="none" stroke="rgba(34,211,238,0.7)" stroke-width="1.5"/>
+          <rect x="14" y="10" width="8" height="2" rx="1" fill="rgba(34,211,238,0.3)"/>
+          <circle cx="18" cy="30" r="4" fill="none" stroke="rgba(34,211,238,0.5)" stroke-width="1"/>
+          <circle cx="18" cy="30" r="1.5" fill="rgba(34,211,238,0.6)"/>
+          <rect x="13" y="41" width="10" height="5" rx="2.5" fill="rgba(34,211,238,0.3)"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="conn-title" id="device-title">正在搜索 NYMIC 设备…</div>
+    <div class="conn-sub" id="device-sub">请确保设备已开机 · Power on your NYMIC device</div>
+
+    <!-- Scanning progress bar -->
+    <div style="width:180px;height:2px;background:var(--bg3);border-radius:1px;margin-top:24px;overflow:hidden">
+      <div id="scan-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--g1),var(--g2));border-radius:1px;transition:width 0.3s"></div>
+    </div>
   </div>
 </div>
 
@@ -404,12 +448,39 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
             <div class="mc-lbl-zh">实时心率</div>
             <div class="mc-sub">Baseline ~74 bpm</div>
           </div>
-          <div class="mc">
-            <div class="mc-icon">🧠</div>
-            <div class="mc-num" id="nv-num">38<span class="mc-unit" style="font-size:13px"> ms</span></div>
-            <div class="mc-lbl">Nerve balance</div>
-            <div class="mc-lbl-zh">自主神经状态</div>
-            <div class="mc-sub" id="nv-sub">Normal · 正常</div>
+          <div class="mc" style="padding:12px 10px">
+            <div class="mc-lbl" style="margin-bottom:6px">Stress Level</div>
+            <div class="mc-lbl-zh" style="margin-bottom:8px">压力指数</div>
+            <!-- Gauge -->
+            <svg id="gauge-svg" viewBox="0 0 100 58" width="100%" style="display:block;margin-bottom:4px">
+              <defs>
+                <linearGradient id="gauge-grad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%"   stop-color="#3dffa0"/>
+                  <stop offset="40%"  stop-color="#f0e040"/>
+                  <stop offset="100%" stop-color="#ff4444"/>
+                </linearGradient>
+              </defs>
+              <!-- Arc track bg -->
+              <path d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="#1a2d3a" stroke-width="6" stroke-linecap="round"/>
+              <!-- Arc colored -->
+              <path id="gauge-arc" d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="url(#gauge-grad)" stroke-width="6" stroke-linecap="round"
+                stroke-dasharray="126" stroke-dashoffset="88"/>
+              <!-- Tick marks -->
+              <line x1="10" y1="50" x2="14" y2="50" stroke="#2a4a5a" stroke-width="1"/>
+              <line x1="50" y1="10" x2="50" y2="14" stroke="#2a4a5a" stroke-width="1"/>
+              <line x1="90" y1="50" x2="86" y2="50" stroke="#2a4a5a" stroke-width="1"/>
+              <!-- Needle -->
+              <g id="gauge-needle" style="transform-origin:50px 50px;transform:rotate(-68deg);transition:transform 1s cubic-bezier(.34,1.56,.64,1)">
+                <line x1="50" y1="50" x2="50" y2="16" stroke="#cde8f0" stroke-width="1.5" stroke-linecap="round" opacity="0.9"/>
+                <circle cx="50" cy="50" r="3.5" fill="#cde8f0" opacity="0.9"/>
+                <circle cx="50" cy="50" r="1.5" fill="#060b0f"/>
+              </g>
+              <!-- Labels -->
+              <text x="7"  y="57" font-size="7" fill="#3dffa0" font-family="monospace">低</text>
+              <text x="44" y="9"  font-size="7" fill="#f0e040" font-family="monospace">中</text>
+              <text x="84" y="57" font-size="7" fill="#ff4444" font-family="monospace">高</text>
+            </svg>
+            <div class="mc-sub" id="nv-sub" style="text-align:center">Relaxed · 放松</div>
           </div>
         </div>
 
@@ -501,8 +572,8 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
           <div class="ebar w"></div>
           <div class="etime">09:34</div>
           <div class="ebody">
-            <div class="emain">Nerve balance dropped</div>
-            <div class="esub">自主神经状态下降 → 功率自动降低</div>
+            <div class="emain">Stress level spiked</div>
+            <div class="esub">压力指数上升 → 功率自动降低保护你</div>
           </div>
           <div class="eright">
             <div class="eval w">↓32%</div>
@@ -512,7 +583,7 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
 
         <div class="estitle" style="margin-top:14px">This week · 本周趋势</div>
         <div class="wsum">
-          <div class="wcell"><div class="wnum">↑12%</div><div class="wlbl">Nerve recovery</div><div class="wlbl-zh">自主神经状态改善</div></div>
+          <div class="wcell"><div class="wnum">↓18%</div><div class="wlbl">Stress reduced</div><div class="wlbl-zh">压力指数下降</div></div>
           <div class="wcell"><div class="wnum">2×</div><div class="wlbl">Triggers today</div><div class="wlbl-zh">今日触发次数</div></div>
           <div class="wcell"><div class="wnum">97%</div><div class="wlbl">Avg blood oxygen</div><div class="wlbl-zh">平均血氧</div></div>
           <div class="wcell"><div class="wnum">Day 14</div><div class="wlbl">Monitoring</div><div class="wlbl-zh">监测第14天</div></div>
@@ -616,7 +687,10 @@ function goTo(id){
   if(cur){cur.classList.add('exit');setTimeout(()=>cur.classList.add('hidden'),400);}
   setTimeout(()=>{const t=document.getElementById(id);t.classList.remove('hidden','exit');},50);
 }
-function goApp(){goTo('pg-app');setTimeout(animateHR,300);}
+function goApp(){goTo('pg-app');setTimeout(animateHR,300);setTimeout(()=>{
+  const n=document.getElementById('gauge-needle');
+  if(n){n.style.transform='rotate(-90deg)';setTimeout(()=>{n.style.transform='rotate(-68deg)';},100);}
+},400);}
 
 // Setup pick
 let picked='hw';
@@ -627,13 +701,13 @@ function pick(k){
   });
 }
 
-// Connecting
-function goConnecting(){
+// Step 1: Connect wearable
+function goConnectWatch(){
   goTo('pg-conn');
   const steps=[
-    ['正在搜索设备…','请确保蓝牙已开启 · Scanning nearby'],
-    ['发现设备，正在连接…','Found NYMIC-NM01 · Establishing connection'],
-    ['连接成功！','Connected successfully · Loading your data'],
+    ['正在搜索手环…','请确保蓝牙已开启 · Scanning nearby'],
+    ['发现设备，正在配对…','Found wearable · Pairing now'],
+    ['手环连接成功 ✓','Wearable connected · Reading biometrics'],
   ];
   let i=0;
   const run=()=>{
@@ -641,10 +715,36 @@ function goConnecting(){
       document.getElementById('conn-title').textContent=steps[i][0];
       document.getElementById('conn-sub').textContent=steps[i][1];
       i++;setTimeout(run,950);
-    } else {setTimeout(()=>{goApp();},350);}
+    } else {setTimeout(()=>goConnectDevice(),400);}
   };
   run();
 }
+
+// Step 2: Connect NYMIC device
+function goConnectDevice(){
+  goTo('pg-conn-device');
+  const bar=document.getElementById('scan-bar');
+  const title=document.getElementById('device-title');
+  const sub=document.getElementById('device-sub');
+  const steps=[
+    {t:'正在搜索 NYMIC 设备…',s:'请确保设备已开机 · Power on your NYMIC device',p:20},
+    {t:'发现 NYMIC-NM01',s:'正在建立蓝牙连接 · Establishing BLE connection',p:55},
+    {t:'正在验证固件版本…',s:'Verifying firmware · NYMIC OS v1.2.4',p:80},
+    {t:'NYMIC 设备连接成功 ✓',s:'All systems connected · Ready to monitor',p:100},
+  ];
+  let i=0;
+  const run=()=>{
+    if(i<steps.length){
+      title.textContent=steps[i].t;
+      sub.textContent=steps[i].s;
+      bar.style.width=steps[i].p+'%';
+      i++;setTimeout(run,900);
+    } else {setTimeout(()=>{goApp();},500);}
+  };
+  run();
+}
+
+function goConnecting(){ goConnectWatch(); }
 
 // Nav
 let cur=0;
@@ -684,8 +784,8 @@ function triggerDemo(){
   document.getElementById('h-state').textContent='Protecting you now';
   document.getElementById('h-zh').textContent='检测到心率超标，功率已自动降低保护你';
   document.getElementById('hr-num').innerHTML='102<span class="mc-unit" style="font-size:13px"> bpm</span>';
-  document.getElementById('nv-num').innerHTML='26<span class="mc-unit" style="font-size:13px"> ms</span>';
-  document.getElementById('nv-sub').textContent='Elevated · 偏高';
+  document.getElementById('gauge-needle').style.transform='rotate(68deg)';
+  document.getElementById('nv-sub').textContent='Stressed · 压力偏高';
   document.getElementById('pval').textContent='4.0 W';
   document.getElementById('bfill').style.width='40%';
   document.getElementById('bfill').style.background='linear-gradient(90deg,#fb923c,#f87171)';
@@ -699,8 +799,8 @@ function triggerDemo(){
       document.getElementById('h-state').textContent="You're doing well";
       document.getElementById('h-zh').textContent='身体状态正常，设备全功率运行';
       document.getElementById('hr-num').innerHTML='74<span class="mc-unit" style="font-size:13px"> bpm</span>';
-      document.getElementById('nv-num').innerHTML='38<span class="mc-unit" style="font-size:13px"> ms</span>';
-      document.getElementById('nv-sub').textContent='Normal · 正常';
+      document.getElementById('gauge-needle').style.transform='rotate(-68deg)';
+      document.getElementById('nv-sub').textContent='Relaxed · 放松';
       document.getElementById('pval').textContent='6.2 W';
       document.getElementById('bfill').style.width='62%';
       document.getElementById('bfill').style.background='linear-gradient(135deg,#4ade80,#22d3ee,#3b82f6)';
