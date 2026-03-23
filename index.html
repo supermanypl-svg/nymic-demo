@@ -3,1385 +3,741 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NYMIC — Smart Nicotine Management</title>
+<title>NYMIC</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500&display=swap');
+:root{--g1:#4ade80;--g2:#22d3ee;--g3:#3b82f6;--bg:#060b0f;--bg2:#0b1318;--bg3:#111d24;--border:#1a2d3a;--border2:#243b4a;--text:#cde8f0;--muted:#4a7a8a;--muted2:#2a4a5a;--warn:#fb923c;--grad:linear-gradient(135deg,var(--g1),var(--g2),var(--g3));--grad-soft:linear-gradient(135deg,rgba(74,222,128,0.12),rgba(34,211,238,0.12),rgba(59,130,246,0.12))}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto Sans SC',sans-serif;color:var(--text);overflow:hidden;user-select:none}
+.shell{width:100%;height:100%;max-width:430px;margin:0 auto;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.amb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0}
+.a1{width:280px;height:280px;background:rgba(74,222,128,0.04);top:-80px;left:-60px}
+.a2{width:220px;height:220px;background:rgba(59,130,246,0.05);bottom:80px;right:-50px}
 
-:root {
-  --g1: #4ade80;
-  --g2: #22d3ee;
-  --g3: #3b82f6;
-  --bg: #060b0f;
-  --bg2: #0b1318;
-  --bg3: #111d24;
-  --border: #1a2d3a;
-  --border2: #243b4a;
-  --text: #cde8f0;
-  --muted: #4a7a8a;
-  --muted2: #2a4a5a;
-  --warn: #fb923c;
-  --danger: #f87171;
-  --grad: linear-gradient(135deg, var(--g1), var(--g2), var(--g3));
-  --grad-soft: linear-gradient(135deg, rgba(74,222,128,0.15), rgba(34,211,238,0.15), rgba(59,130,246,0.15));
-}
+/* Page system */
+.page{position:absolute;inset:0;display:flex;flex-direction:column;transition:transform 0.38s cubic-bezier(0.4,0,0.2,1),opacity 0.38s;z-index:1}
+.page.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
+.page.exit{transform:translateX(-100%);opacity:0;pointer-events:none}
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+/* ══ WELCOME ══ */
+#pg-welcome{background:var(--bg);justify-content:center;align-items:center;padding:36px 28px;text-align:center}
+.wl-logo{font-size:26px;font-weight:800;letter-spacing:4px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.wl-tagline{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:1px;margin-bottom:44px}
+.wl-orb{width:110px;height:110px;border-radius:50%;background:var(--grad-soft);border:1px solid rgba(34,211,238,0.18);display:flex;align-items:center;justify-content:center;margin:0 auto 36px;position:relative}
+.wl-orb::before{content:'';position:absolute;inset:-10px;border-radius:50%;border:1px solid rgba(34,211,238,0.07)}
+.wl-orb-icon{font-size:46px}
+.wl-title{font-size:21px;font-weight:600;color:var(--text);margin-bottom:12px;line-height:1.35}
+.wl-desc{font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:44px}
+.wl-desc strong{color:var(--text);font-weight:500}
+.btn-main{width:100%;padding:15px;border-radius:16px;background:var(--grad);border:none;color:#060b0f;font-size:14px;font-weight:700;font-family:'Syne',sans-serif;letter-spacing:.5px;cursor:pointer;transition:opacity .2s}
+.btn-main:active{opacity:.84}
+.btn-main .zh{font-size:10px;font-family:'Noto Sans SC',sans-serif;font-weight:400;opacity:.7;display:block;margin-top:2px}
+.btn-skip{margin-top:14px;font-size:12px;color:var(--muted2);cursor:pointer;padding:8px}
 
-html, body {
-  width: 100%; height: 100%;
-  background: var(--bg);
-  font-family: 'Syne', 'Noto Sans SC', sans-serif;
-  color: var(--text);
-  overflow: hidden;
-  user-select: none;
-}
+/* ══ SETUP ══ */
+#pg-setup{background:var(--bg)}
+.setup-top{padding:52px 24px 20px;flex-shrink:0;text-align:center}
+.setup-step{font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1.2px;margin-bottom:8px}
+.setup-title{font-size:19px;font-weight:600;color:var(--text);margin-bottom:5px}
+.setup-sub{font-size:12px;color:var(--muted);line-height:1.6}
+.setup-body{flex:1;padding:0 20px;overflow-y:auto}
+.setup-card{background:var(--bg2);border:.5px solid var(--border);border-radius:16px;padding:16px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s,background .2s}
+.setup-card.sel{border-color:rgba(34,211,238,.4);background:color-mix(in srgb,#22d3ee 5%,var(--bg2))}
+.sc-icon{font-size:26px;flex-shrink:0}
+.sc-body{flex:1}
+.sc-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.sc-desc{font-size:11px;color:var(--muted);line-height:1.4}
+.sc-chk{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.setup-card.sel .sc-chk{background:var(--g2);border-color:var(--g2)}
+.setup-card.sel .sc-chk::after{content:'✓';font-size:11px;color:#060b0f;font-weight:700}
+.setup-foot{padding:16px 20px 32px;flex-shrink:0}
 
-/* ── App Shell ── */
-.app-shell {
-  width: 100%; height: 100%;
-  display: flex;
-  flex-direction: column;
-  max-width: 430px;
-  margin: 0 auto;
-  position: relative;
-  overflow: hidden;
-}
+/* ══ CONNECTING ══ */
+#pg-connecting{background:var(--bg);justify-content:center;align-items:center;padding:40px 28px;text-align:center}
+.conn-ring{width:96px;height:96px;border-radius:50%;border:2px solid var(--border2);border-top-color:var(--g2);animation:spin 1s linear infinite;margin:0 auto 24px;display:flex;align-items:center;justify-content:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+.conn-inner{font-size:28px;animation:counter-spin 1s linear infinite}
+@keyframes counter-spin{to{transform:rotate(-360deg)}}
+.conn-title{font-size:16px;font-weight:500;color:var(--text);margin-bottom:6px}
+.conn-sub{font-size:12px;color:var(--muted)}
 
-/* ── Ambient background ── */
-.ambient {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(80px);
-  pointer-events: none;
-  z-index: 0;
-}
-.amb1 { width: 300px; height: 300px; background: rgba(74,222,128,0.04); top: -100px; left: -80px; }
-.amb2 { width: 250px; height: 250px; background: rgba(59,130,246,0.05); bottom: 100px; right: -60px; }
-.amb3 { width: 200px; height: 200px; background: rgba(34,211,238,0.03); top: 40%; left: 30%; }
+/* ══ APP ══ */
+#pg-app{background:var(--bg)}
+.sbar{display:flex;justify-content:space-between;align-items:center;padding:13px 20px 5px;flex-shrink:0;position:relative;z-index:2}
+.sbar-time{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sbar-conn{display:flex;align-items:center;gap:5px}
+.conn-dot{width:6px;height:6px;border-radius:50%;background:var(--g1);animation:pdot 2s ease-in-out infinite}
+@keyframes pdot{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(74,222,128,.3)}50%{opacity:.7;box-shadow:0 0 0 4px rgba(74,222,128,0)}}
+.conn-lbl{font-size:9px;font-family:'DM Mono',monospace;color:var(--muted)}
+.aheader{padding:3px 20px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.alogo{font-size:17px;font-weight:800;letter-spacing:3px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.alogo-sub{font-size:8px;color:var(--muted2);font-family:'DM Mono',monospace;letter-spacing:.5px}
 
-/* ── Status bar ── */
-.status-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 20px 6px;
-  position: relative; z-index: 2;
-  flex-shrink: 0;
-}
-.status-time {
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  font-weight: 500;
-  background: var(--grad);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.status-right { display: flex; gap: 5px; align-items: center; }
-.sig-bar {
-  width: 3px; border-radius: 1px;
-  background: var(--g2);
-}
+/* Screens */
+.sw{flex:1;overflow:hidden;position:relative;z-index:1}
+.si{display:flex;height:100%;transition:transform .4s cubic-bezier(.4,0,.2,1)}
+.sc{min-width:100%;height:100%;overflow-y:auto;overflow-x:hidden;padding:0 16px 100px;scrollbar-width:none}
+.sc::-webkit-scrollbar{display:none}
 
-/* ── Top header ── */
-.top-header {
-  padding: 6px 20px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: relative; z-index: 2;
-  flex-shrink: 0;
-}
-.logo {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 3px;
-  background: var(--grad);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.logo-sub {
-  font-size: 8px;
-  font-weight: 400;
-  letter-spacing: 1px;
-  color: var(--muted);
-  font-family: 'DM Mono', monospace;
-  margin-top: 1px;
-}
-.device-pill {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: var(--bg2);
-  border: 0.5px solid var(--border2);
-  border-radius: 20px;
-  padding: 5px 10px;
-}
-.device-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--g1);
-  animation: pulse-dot 2s ease-in-out infinite;
-}
-@keyframes pulse-dot {
-  0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(74,222,128,0.3)}
-  50%{opacity:0.7;box-shadow:0 0 0 4px rgba(74,222,128,0)}
-}
-.device-name { font-size: 9px; color: var(--muted); font-family: 'DM Mono', monospace; }
+/* Nav */
+.nav{position:absolute;bottom:0;left:0;right:0;background:rgba(6,11,15,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:.5px solid var(--border);display:flex;padding:7px 0 18px;z-index:10}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0}
+.ni-bg{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.ni.active .ni-bg{background:var(--grad-soft);border:.5px solid rgba(34,211,238,.2)}
+.ni-en{font-size:8px;font-family:'DM Mono',monospace;color:var(--muted2)}
+.ni-zh{font-size:8px;font-family:'Noto Sans SC',sans-serif;color:var(--muted2);font-weight:300}
+.ni.active .ni-en,.ni.active .ni-zh{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
-/* ── Screen container ── */
-.screens-wrap {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-  z-index: 1;
-}
-.screens-inner {
-  display: flex;
-  height: 100%;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.screen {
-  min-width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 0 16px 100px;
-  scrollbar-width: none;
-}
-.screen::-webkit-scrollbar { display: none; }
+/* HOME */
+.hero{background:var(--bg2);border:.5px solid var(--border);border-radius:20px;padding:22px 18px;margin-bottom:11px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:var(--grad-soft);opacity:.5}
+.hero-lbl{font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;position:relative}
+.hero-emoji{font-size:46px;margin-bottom:8px;position:relative;display:block}
+.hero-state{font-size:19px;font-weight:600;color:var(--text);margin-bottom:3px;position:relative}
+.hero-state-zh{font-size:11px;color:var(--muted);font-family:'Noto Sans SC',sans-serif;font-weight:300;position:relative}
+.live-pill{display:inline-flex;align-items:center;gap:5px;margin-top:11px;background:rgba(74,222,128,.08);border:.5px solid rgba(74,222,128,.2);border-radius:20px;padding:4px 12px;position:relative}
+.ldot{width:6px;height:6px;border-radius:50%;background:var(--g1);animation:pdot 1.5s ease-in-out infinite}
+.ltxt{font-size:9px;font-family:'DM Mono',monospace;color:var(--g1);letter-spacing:.8px}
 
-/* ── Nav bar ── */
-.nav-bar {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  background: rgba(6,11,15,0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 0.5px solid var(--border);
-  display: flex;
-  padding: 8px 0 20px;
-  z-index: 10;
-}
-.nav-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  padding: 4px 0;
-  transition: opacity 0.2s;
-}
-.nav-item:active { opacity: 0.6; }
-.nav-icon-wrap {
-  width: 32px; height: 32px;
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
-}
-.nav-item.active .nav-icon-wrap {
-  background: var(--grad-soft);
-  border: 0.5px solid rgba(34,211,238,0.2);
-}
-.nav-icon {
-  width: 16px; height: 16px;
-}
-.nav-label-en { font-size: 8px; font-family: 'DM Mono', monospace; }
-.nav-label-zh { font-size: 8px; font-family: 'Noto Sans SC', sans-serif; font-weight: 300; }
-.nav-item.active .nav-label-en,
-.nav-item.active .nav-label-zh {
-  background: var(--grad);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.nav-item:not(.active) .nav-label-en,
-.nav-item:not(.active) .nav-label-zh { color: var(--muted2); }
-.nav-item:not(.active) .nav-icon-wrap svg { opacity: 0.3; }
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:11px}
+.mc{background:var(--bg2);border:.5px solid var(--border);border-radius:16px;padding:15px 13px}
+.mc-icon{font-size:17px;margin-bottom:7px}
+.mc-num{font-family:'DM Mono',monospace;font-size:26px;font-weight:400;line-height:1;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:3px}
+.mc-unit{font-size:12px}
+.mc-lbl{font-size:11px;color:var(--muted);margin-bottom:1px}
+.mc-lbl-zh{font-size:10px;color:var(--muted2);font-family:'Noto Sans SC',sans-serif;font-weight:300}
+.mc-sub{font-size:10px;color:var(--muted2);margin-top:4px;font-family:'DM Mono',monospace}
 
-/* ── Cards ── */
-.card {
-  background: var(--bg2);
-  border: 0.5px solid var(--border);
-  border-radius: 16px;
-  padding: 14px;
-  margin-bottom: 10px;
-  position: relative;
-  overflow: hidden;
-}
-.card-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
-}
-.card-title-en {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  background: var(--grad);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.card-title-zh {
-  font-size: 10px;
-  color: var(--muted);
-  font-family: 'Noto Sans SC', sans-serif;
-  font-weight: 300;
-  margin-top: 1px;
-}
-.badge {
-  font-size: 8px;
-  padding: 3px 8px;
-  border-radius: 20px;
-  font-family: 'DM Mono', monospace;
-  font-weight: 500;
-}
-.badge-ok { background: rgba(74,222,128,0.1); border: 0.5px solid rgba(74,222,128,0.2); color: var(--g1); }
-.badge-warn { background: rgba(251,146,60,0.1); border: 0.5px solid rgba(251,146,60,0.2); color: var(--warn); }
-.badge-blue { background: rgba(59,130,246,0.1); border: 0.5px solid rgba(59,130,246,0.2); color: var(--g3); }
+.pcard{background:var(--bg2);border:.5px solid var(--border);border-radius:16px;padding:15px 17px;margin-bottom:11px}
+.prow{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.ptitle{font-size:11px;color:var(--muted)}
+.ptitle-zh{font-size:10px;color:var(--muted2);font-family:'Noto Sans SC',sans-serif;font-weight:300}
+.pval{font-family:'DM Mono',monospace;font-size:20px;font-weight:400;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.btrack{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.bfill{height:100%;border-radius:3px;background:var(--grad);transition:width 1s ease,background .5s}
+.blbls{display:flex;justify-content:space-between;font-size:9px;color:var(--muted2);font-family:'DM Mono',monospace;margin-top:5px}
 
-/* ══════════ SCREEN 1: DASHBOARD ══════════ */
-.hr-ring-wrap {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px 0 4px;
-}
-.hr-ring {
-  position: relative;
-  width: 150px; height: 150px;
-  display: flex; align-items: center; justify-content: center;
-}
-.hr-ring svg { position: absolute; inset: 0; }
-.hr-center { text-align: center; }
-.hr-num {
-  font-family: 'DM Mono', monospace;
-  font-size: 42px;
-  font-weight: 300;
-  background: var(--grad);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1;
-}
-.hr-unit {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 2px;
-}
-.hr-label-zh {
-  font-size: 10px;
-  color: var(--muted2);
-  font-family: 'Noto Sans SC', sans-serif;
-  margin-top: 1px;
-}
+.spo2{background:var(--bg2);border:.5px solid var(--border);border-radius:14px;padding:11px 15px;display:flex;align-items:center;gap:11px}
+.spo2-icon{font-size:19px}
+.spo2-val{font-family:'DM Mono',monospace;font-size:18px;color:var(--g3);font-weight:400}
+.spo2-lbl{font-size:10px;color:var(--muted2)}
+.spo2-badge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:12px;background:rgba(59,130,246,.1);border:.5px solid rgba(59,130,246,.2);color:var(--g3)}
 
-.live-pill {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin: 8px auto;
-  width: fit-content;
-  background: var(--bg3);
-  border: 0.5px solid var(--border2);
-  border-radius: 20px;
-  padding: 5px 14px;
-}
-.live-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--g1);
-  animation: pulse-dot 1.5s ease-in-out infinite;
-}
-.live-en { font-size: 9px; font-family: 'DM Mono', monospace; color: var(--g1); letter-spacing: 0.8px; }
-.live-zh { font-size: 9px; font-family: 'Noto Sans SC', sans-serif; color: var(--muted); font-weight: 300; }
+/* TRENDS */
+.thead{padding:6px 0 12px}
+.thead-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:2px}
+.thead-sub{font-size:11px;color:var(--muted);font-family:'Noto Sans SC',sans-serif;font-weight:300}
+.ccrd{background:var(--bg2);border:.5px solid var(--border);border-radius:16px;padding:15px;margin-bottom:11px}
+.clbl{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.5px;margin-bottom:11px;display:flex;justify-content:space-between;align-items:center}
+.ctabs{display:flex;gap:4px}
+.ctab{font-size:9px;padding:2px 8px;border-radius:8px;color:var(--muted2);cursor:pointer}
+.ctab.active{background:rgba(34,211,238,.1);color:var(--g2);border:.5px solid rgba(34,211,238,.2)}
+.estitle{font-size:10px;font-weight:600;letter-spacing:.8px;color:var(--muted2);font-family:'DM Mono',monospace;text-transform:uppercase;margin-bottom:7px;margin-top:3px}
+.eitem{background:var(--bg2);border:.5px solid var(--border);border-radius:12px;padding:11px 13px;margin-bottom:7px;display:flex;gap:9px;align-items:flex-start}
+.ebar{width:3px;border-radius:2px;flex-shrink:0;align-self:stretch}
+.ebar.w{background:var(--warn)}
+.ebar.ok{background:var(--g1)}
+.etime{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);flex-shrink:0;padding-top:1px}
+.ebody{flex:1}
+.emain{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px;line-height:1.3}
+.esub{font-size:11px;color:var(--muted);font-family:'Noto Sans SC',sans-serif;font-weight:300;line-height:1.4}
+.eright{text-align:right;flex-shrink:0}
+.eval{font-family:'DM Mono',monospace;font-size:12px;font-weight:500}
+.eval.w{color:var(--warn)}
+.eval.ok{color:var(--g1)}
+.eact{font-size:9px;color:var(--muted2);font-family:'DM Mono',monospace;margin-top:2px}
+.wsum{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wcell{background:var(--bg2);border:.5px solid var(--border);border-radius:12px;padding:11px 13px}
+.wnum{font-family:'DM Mono',monospace;font-size:20px;font-weight:400;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:3px}
+.wlbl{font-size:10px;color:var(--muted2)}
+.wlbl-zh{font-size:10px;color:var(--muted2);font-family:'Noto Sans SC',sans-serif;font-weight:300}
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-.stat-cell {
-  background: var(--bg3);
-  border: 0.5px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 8px;
-  text-align: center;
-}
-.stat-num {
-  font-family: 'DM Mono', monospace;
-  font-size: 20px;
-  font-weight: 400;
-  background: var(--grad);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1;
-  margin-bottom: 3px;
-}
-.stat-en { font-size: 8px; color: var(--muted2); letter-spacing: 0.3px; line-height: 1.3; }
-.stat-zh { font-size: 8px; color: var(--muted2); font-family: 'Noto Sans SC', sans-serif; font-weight: 300; }
+/* SETTINGS */
+.sprof{background:var(--bg2);border:.5px solid var(--border);border-radius:16px;padding:15px;margin-bottom:13px;display:flex;align-items:center;gap:11px;position:relative;overflow:hidden}
+.sprof::before{content:'';position:absolute;inset:0;background:var(--grad-soft);opacity:.4}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#060b0f;flex-shrink:0;position:relative}
+.pname{font-size:14px;font-weight:600;color:var(--text);position:relative}
+.psince{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;position:relative}
+.psince-zh{font-size:10px;color:var(--muted2);font-family:'Noto Sans SC',sans-serif;font-weight:300;position:relative}
+.pday{position:relative;text-align:right;margin-left:auto}
+.dnum{font-family:'DM Mono',monospace;font-size:26px;font-weight:300;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.dlbl{font-size:9px;color:var(--muted);font-family:'DM Mono',monospace}
 
-.power-section { margin-bottom: 10px; }
-.power-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-.power-label-group { }
-.power-en { font-size: 9px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
-.power-zh { font-size: 9px; color: var(--muted2); font-family: 'Noto Sans SC', sans-serif; font-weight: 300; }
-.power-val {
-  font-family: 'DM Mono', monospace;
-  font-size: 16px;
-  font-weight: 400;
-  background: var(--grad);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.bar-track {
-  height: 5px;
-  background: var(--bg3);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-bottom: 4px;
-}
-.bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  background: var(--grad);
-  transition: width 1s ease;
-}
-.bar-labels {
-  display: flex;
-  justify-content: space-between;
-  font-family: 'DM Mono', monospace;
-  font-size: 8px;
-  color: var(--muted2);
-}
+.stitle{font-size:9px;font-weight:600;letter-spacing:1.5px;color:var(--muted2);font-family:'DM Mono',monospace;text-transform:uppercase;margin:15px 0 7px;display:flex;align-items:center;gap:6px}
+.stitle span{font-family:'Noto Sans SC',sans-serif;font-weight:300;text-transform:none;letter-spacing:0;font-size:9px}
 
-.spo2-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--bg3);
-  border: 0.5px solid var(--border);
-  border-radius: 12px;
-}
-.spo2-icon { font-size: 18px; }
-.spo2-info { flex: 1; }
-.spo2-val {
-  font-family: 'DM Mono', monospace;
-  font-size: 18px;
-  font-weight: 400;
-  color: var(--g3);
-  line-height: 1;
-}
-.spo2-en { font-size: 8px; color: var(--muted2); font-family: 'DM Mono', monospace; }
-.spo2-zh { font-size: 8px; color: var(--muted2); font-family: 'Noto Sans SC', sans-serif; font-weight: 300; }
+.slcard{background:var(--bg2);border:.5px solid var(--border);border-radius:14px;padding:13px 15px;margin-bottom:7px}
+.sltop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:11px}
+.slname{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.slname-zh{font-size:10px;color:var(--muted);font-family:'Noto Sans SC',sans-serif;font-weight:300}
+.slval{font-family:'DM Mono',monospace;font-size:18px;font-weight:400;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:right}
+.slval-u{font-size:11px}
+.str{height:4px;background:var(--bg3);border-radius:2px;position:relative;margin-bottom:5px;cursor:pointer}
+.stf{height:100%;border-radius:2px;background:var(--grad);pointer-events:none}
+.sth{position:absolute;top:-8px;width:20px;height:20px;background:var(--bg);border:2px solid var(--g2);border-radius:50%;transform:translateX(-50%);cursor:grab;box-shadow:0 0 8px rgba(34,211,238,.3);transition:box-shadow .2s}
+.sth:active{cursor:grabbing;box-shadow:0 0 16px rgba(34,211,238,.5)}
+.slrange{display:flex;justify-content:space-between;font-size:9px;color:var(--muted2);font-family:'DM Mono',monospace}
 
-/* ══════════ SCREEN 2: TRENDS ══════════ */
-.time-tabs {
-  display: flex;
-  gap: 4px;
-}
-.time-tab {
-  font-size: 9px;
-  font-family: 'DM Mono', monospace;
-  padding: 3px 8px;
-  border-radius: 8px;
-  color: var(--muted2);
-  cursor: pointer;
-  transition: all 0.2s;
-  border: 0.5px solid transparent;
-}
-.time-tab.active {
-  background: var(--grad-soft);
-  border-color: rgba(34,211,238,0.2);
-  color: var(--g2);
-}
+.trow{background:var(--bg2);border:.5px solid var(--border);border-radius:12px;padding:11px 15px;display:flex;align-items:center;margin-bottom:6px;cursor:pointer}
+.tinfo{flex:1}
+.tname{font-size:12px;font-weight:500;color:var(--text);margin-bottom:1px}
+.tname-zh{font-size:10px;color:var(--muted);font-family:'Noto Sans SC',sans-serif;font-weight:300}
+.tsw{width:38px;height:22px;border-radius:11px;position:relative;flex-shrink:0;transition:background .3s;cursor:pointer}
+.tsw.on{background:linear-gradient(90deg,rgba(74,222,128,.3),rgba(34,211,238,.3));border:.5px solid rgba(34,211,238,.4)}
+.tsw.off{background:var(--bg3);border:.5px solid var(--border2)}
+.tknob{position:absolute;top:3px;width:16px;height:16px;border-radius:50%;transition:all .3s}
+.tsw.on .tknob{left:19px;background:var(--g2);box-shadow:0 0 6px rgba(34,211,238,.4)}
+.tsw.off .tknob{left:3px;background:var(--muted2)}
 
-.chart-box {
-  background: var(--bg3);
-  border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 10px;
-  position: relative;
-}
-.chart-threshold {
-  position: absolute;
-  left: 32px; right: 12px;
-  height: 0.5px;
-  background: rgba(251,146,60,0.4);
-  top: 32px;
-}
-.chart-threshold-label {
-  position: absolute;
-  right: 14px; top: 22px;
-  font-size: 8px;
-  color: rgba(251,146,60,0.7);
-  font-family: 'DM Mono', monospace;
-}
-.chart-y-labels {
-  position: absolute;
-  left: 10px; top: 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 90px;
-}
-.y-lbl {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px;
-  color: var(--muted2);
-}
-.chart-svg-wrap {
-  margin-left: 26px;
-  margin-top: 8px;
-}
+.dbtn{width:100%;background:transparent;border:1px solid rgba(34,211,238,.3);border-radius:14px;padding:14px;text-align:center;cursor:pointer;margin-top:15px;position:relative;overflow:hidden;transition:all .2s}
+.dbtn::before{content:'';position:absolute;inset:0;background:var(--grad-soft);opacity:0;transition:opacity .2s}
+.dbtn:active::before{opacity:1}
+.dbtn-en{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;position:relative}
+.dbtn-zh{font-size:10px;font-family:'Noto Sans SC',sans-serif;color:var(--muted);font-weight:300;margin-top:3px;position:relative}
 
-.events-title {
-  font-size: 9px;
-  font-family: 'DM Mono', monospace;
-  color: var(--muted);
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-.events-title-zh {
-  font-size: 9px;
-  font-family: 'Noto Sans SC', sans-serif;
-  color: var(--muted2);
-  font-weight: 300;
-}
-
-.event-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 8px 10px;
-  background: var(--bg3);
-  border: 0.5px solid var(--border);
-  border-radius: 10px;
-  margin-bottom: 6px;
-}
-.ev-indicator {
-  width: 2px;
-  height: 32px;
-  border-radius: 1px;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-.ev-indicator.warn { background: var(--warn); }
-.ev-indicator.ok { background: var(--g1); }
-.ev-time {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: var(--muted);
-  width: 38px;
-  flex-shrink: 0;
-  padding-top: 1px;
-}
-.ev-body { flex: 1; }
-.ev-en { font-size: 10px; color: var(--text); font-weight: 500; line-height: 1.3; }
-.ev-zh { font-size: 9px; color: var(--muted); font-family: 'Noto Sans SC', sans-serif; font-weight: 300; }
-.ev-val-col { text-align: right; flex-shrink: 0; }
-.ev-val {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1;
-  margin-bottom: 2px;
-}
-.ev-val.warn { color: var(--warn); }
-.ev-val.ok { color: var(--g1); }
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.sum-cell {
-  background: var(--bg3);
-  border: 0.5px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
-}
-.sum-num {
-  font-family: 'DM Mono', monospace;
-  font-size: 22px;
-  font-weight: 400;
-  background: var(--grad);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-.sum-en { font-size: 9px; color: var(--muted2); font-family: 'DM Mono', monospace; }
-.sum-zh { font-size: 9px; color: var(--muted2); font-family: 'Noto Sans SC', sans-serif; font-weight: 300; }
-
-/* ══════════ SCREEN 3: SETTINGS ══════════ */
-.profile-card {
-  background: var(--bg2);
-  border: 0.5px solid var(--border);
-  border-radius: 16px;
-  padding: 14px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  position: relative;
-  overflow: hidden;
-}
-.profile-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--grad-soft);
-  opacity: 0.5;
-}
-.avatar {
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  background: var(--grad);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 700; color: #060b0f;
-  flex-shrink: 0;
-  position: relative;
-}
-.profile-info { flex: 1; position: relative; }
-.profile-name { font-size: 14px; font-weight: 600; color: var(--text); }
-.profile-plan-en { font-size: 9px; font-family: 'DM Mono', monospace; color: var(--muted); margin-top: 2px; }
-.profile-plan-zh { font-size: 9px; font-family: 'Noto Sans SC', sans-serif; color: var(--muted2); font-weight: 300; }
-.profile-day {
-  position: relative;
-  text-align: right;
-}
-.day-num {
-  font-family: 'DM Mono', monospace;
-  font-size: 24px;
-  font-weight: 300;
-  background: var(--grad);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1;
-}
-.day-label-en { font-size: 8px; font-family: 'DM Mono', monospace; color: var(--muted); }
-.day-label-zh { font-size: 8px; font-family: 'Noto Sans SC', sans-serif; color: var(--muted2); font-weight: 300; }
-
-.section-label {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--muted2);
-  font-family: 'DM Mono', monospace;
-  margin-bottom: 8px;
-  margin-top: 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.section-label-zh {
-  font-family: 'Noto Sans SC', sans-serif;
-  font-weight: 300;
-  letter-spacing: 0;
-  text-transform: none;
-  font-size: 9px;
-  color: var(--muted2);
-}
-
-.slider-card {
-  background: var(--bg2);
-  border: 0.5px solid var(--border);
-  border-radius: 14px;
-  padding: 12px 14px;
-  margin-bottom: 8px;
-}
-.slider-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 10px;
-}
-.slider-label-en { font-size: 11px; font-weight: 500; color: var(--text); }
-.slider-label-zh { font-size: 9px; font-family: 'Noto Sans SC', sans-serif; color: var(--muted); font-weight: 300; }
-.slider-value {
-  font-family: 'DM Mono', monospace;
-  font-size: 16px;
-  font-weight: 400;
-  background: var(--grad);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-align: right;
-}
-.slider-value-unit { font-size: 10px; }
-
-.slider-track {
-  height: 4px;
-  background: var(--bg3);
-  border-radius: 2px;
-  position: relative;
-  margin-bottom: 6px;
-  cursor: pointer;
-}
-.slider-fill-grad {
-  height: 100%;
-  border-radius: 2px;
-  background: var(--grad);
-  pointer-events: none;
-}
-.slider-thumb {
-  position: absolute;
-  top: -8px;
-  width: 20px; height: 20px;
-  background: var(--bg);
-  border: 2px solid var(--g2);
-  border-radius: 50%;
-  transform: translateX(-50%);
-  cursor: grab;
-  box-shadow: 0 0 8px rgba(34,211,238,0.3);
-  transition: box-shadow 0.2s;
-}
-.slider-thumb:active { cursor: grabbing; box-shadow: 0 0 16px rgba(34,211,238,0.5); }
-.slider-range-labels {
-  display: flex;
-  justify-content: space-between;
-  font-family: 'DM Mono', monospace;
-  font-size: 8px;
-  color: var(--muted2);
-}
-
-.toggle-card {
-  background: var(--bg2);
-  border: 0.5px solid var(--border);
-  border-radius: 12px;
-  padding: 11px 14px;
-  display: flex;
-  align-items: center;
-  margin-bottom: 6px;
-  cursor: pointer;
-}
-.toggle-info { flex: 1; }
-.toggle-label-en { font-size: 11px; font-weight: 500; color: var(--text); }
-.toggle-label-zh { font-size: 9px; font-family: 'Noto Sans SC', sans-serif; color: var(--muted); font-weight: 300; }
-.toggle-switch {
-  width: 38px; height: 22px;
-  border-radius: 11px;
-  position: relative;
-  flex-shrink: 0;
-  transition: background 0.3s;
-  cursor: pointer;
-}
-.toggle-switch.on { background: linear-gradient(90deg, rgba(74,222,128,0.3), rgba(34,211,238,0.3)); border: 0.5px solid rgba(34,211,238,0.4); }
-.toggle-switch.off { background: var(--bg3); border: 0.5px solid var(--border2); }
-.toggle-knob {
-  position: absolute;
-  top: 3px;
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  transition: all 0.3s;
-}
-.toggle-switch.on .toggle-knob { left: 19px; background: var(--g2); box-shadow: 0 0 6px rgba(34,211,238,0.4); }
-.toggle-switch.off .toggle-knob { left: 3px; background: var(--muted2); }
-
-/* Demo trigger button */
-.demo-trigger-btn {
-  width: 100%;
-  background: transparent;
-  border: 1px solid;
-  border-image: linear-gradient(135deg, var(--g1), var(--g2), var(--g3)) 1;
-  border-radius: 14px;
-  padding: 14px;
-  text-align: center;
-  cursor: pointer;
-  margin-top: 14px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s;
-}
-.demo-trigger-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--grad-soft);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.demo-trigger-btn:active::before { opacity: 1; }
-.demo-btn-en {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  background: var(--grad);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  position: relative;
-}
-.demo-btn-zh {
-  font-size: 10px;
-  font-family: 'Noto Sans SC', sans-serif;
-  color: var(--muted);
-  font-weight: 300;
-  margin-top: 2px;
-  position: relative;
-}
-
-/* ── Toast notification ── */
-.toast {
-  position: fixed;
-  top: 80px;
-  left: 50%; transform: translateX(-50%);
-  background: var(--bg2);
-  border: 0.5px solid rgba(251,146,60,0.4);
-  border-radius: 16px;
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  z-index: 100;
-  opacity: 0;
-  transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
-  pointer-events: none;
-  min-width: 260px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-}
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-.toast-icon { font-size: 18px; }
-.toast-text-en { font-size: 11px; font-weight: 600; color: var(--warn); }
-.toast-text-zh { font-size: 10px; font-family: 'Noto Sans SC', sans-serif; color: var(--muted); font-weight: 300; }
-
-/* ── Animate numbers ── */
-@keyframes countUp { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform: translateY(0); } }
-.stat-num, .hr-num { animation: countUp 0.6s ease both; }
-
-/* ── Wave animation on ring ── */
-@keyframes ring-spin {
-  from { stroke-dashoffset: 0; }
-  to { stroke-dashoffset: -251; }
-}
+/* Toast */
+.toast{position:fixed;top:76px;left:50%;transform:translateX(-50%) translateY(-8px);background:var(--bg2);border:.5px solid rgba(251,146,60,.4);border-radius:16px;padding:11px 15px;display:flex;align-items:center;gap:9px;z-index:100;opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);pointer-events:none;min-width:265px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.tst-icon{font-size:17px;flex-shrink:0}
+.tst-en{font-size:11px;font-weight:600;color:var(--warn)}
+.tst-zh{font-size:10px;font-family:'Noto Sans SC',sans-serif;color:var(--muted);font-weight:300}
 </style>
 </head>
 <body>
+<div class="amb a1"></div>
+<div class="amb a2"></div>
 
-<div class="ambient amb1"></div>
-<div class="ambient amb2"></div>
-<div class="ambient amb3"></div>
-
-<!-- Toast -->
 <div class="toast" id="toast">
-  <div class="toast-icon">⚡</div>
+  <div class="tst-icon">⚡</div>
   <div>
-    <div class="toast-text-en">Power limited — HR 102bpm</div>
-    <div class="toast-text-zh">心率超标，功率已自动限制至 4.0W</div>
+    <div class="tst-en">Heart rate spike — power reduced</div>
+    <div class="tst-zh">检测到心率超标，功率已自动降低</div>
   </div>
 </div>
 
-<div class="app-shell">
+<!-- ══ WELCOME ══ -->
+<div class="page shell" id="pg-welcome">
+  <div style="position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:36px 28px;">
+    <!-- Logo SVG -->
+    <svg viewBox="0 0 200 90" width="200" height="90" style="display:block;margin:0 auto 8px">
+      <defs>
+        <linearGradient id="wg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#4ade80"/>
+          <stop offset="55%" stop-color="#22d3ee"/>
+          <stop offset="100%" stop-color="#3b82f6"/>
+        </linearGradient>
+        <linearGradient id="wg2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.05"/>
+        </linearGradient>
+      </defs>
+      <!-- Molecule outer ring -->
+      <circle cx="38" cy="45" r="28" fill="url(#wg2)" stroke="url(#wg)" stroke-width="1.2"/>
+      <!-- Molecule inner dashed ring -->
+      <circle cx="38" cy="45" r="16" fill="none" stroke="url(#wg)" stroke-width="0.7" stroke-dasharray="3 3.5"/>
+      <!-- 6 atom nodes -->
+      <circle cx="38" cy="18" r="3.2" fill="#4ade80"/>
+      <circle cx="62" cy="31" r="2.8" fill="#22d3ee"/>
+      <circle cx="62" cy="59" r="2.8" fill="#22d3ee"/>
+      <circle cx="38" cy="72" r="3.2" fill="#3b82f6"/>
+      <circle cx="14" cy="59" r="2.8" fill="#4ade80"/>
+      <circle cx="14" cy="31" r="2.8" fill="#4ade80"/>
+      <!-- Bond lines -->
+      <line x1="38" y1="21" x2="59" y2="33" stroke="url(#wg)" stroke-width="0.8" opacity="0.55"/>
+      <line x1="59" y1="33" x2="59" y2="57" stroke="url(#wg)" stroke-width="0.8" opacity="0.55"/>
+      <line x1="59" y1="57" x2="38" y2="69" stroke="url(#wg)" stroke-width="0.8" opacity="0.55"/>
+      <line x1="38" y1="69" x2="17" y2="57" stroke="url(#wg)" stroke-width="0.8" opacity="0.55"/>
+      <line x1="17" y1="57" x2="17" y2="33" stroke="url(#wg)" stroke-width="0.8" opacity="0.55"/>
+      <line x1="17" y1="33" x2="38" y2="21" stroke="url(#wg)" stroke-width="0.8" opacity="0.55"/>
+      <!-- Center control node -->
+      <circle cx="38" cy="45" r="5" fill="url(#wg)" opacity="0.95"/>
+      <circle cx="38" cy="45" r="9" fill="none" stroke="#22d3ee" stroke-width="0.6" opacity="0.35"/>
+      <!-- Wordmark -->
+      <text x="78" y="38" font-family="'Helvetica Neue','Arial',sans-serif"
+        font-size="28" font-weight="200" letter-spacing="5" fill="url(#wg)">NYMIC</text>
+      <text x="80" y="54" font-family="'Helvetica Neue','Arial',sans-serif"
+        font-size="7.5" font-weight="400" letter-spacing="2" fill="#4a7a8a">SMART NICOTINE MANAGEMENT</text>
+      <text x="80" y="67" font-family="'PingFang SC','Noto Sans SC',sans-serif"
+        font-size="8" font-weight="300" letter-spacing="1" fill="#2a4a5a">智能尼古丁管理系统</text>
+    </svg>
 
-  <!-- Status bar -->
-  <div class="status-bar">
-    <div class="status-time" id="clock">09:41</div>
-    <div class="status-right">
-      <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
-        <rect x="0" y="6" width="3" height="4" rx="0.5" fill="#4ade80" opacity="0.4"/>
-        <rect x="4" y="3" width="3" height="7" rx="0.5" fill="#22d3ee" opacity="0.6"/>
-        <rect x="8" y="1" width="3" height="9" rx="0.5" fill="#3b82f6" opacity="0.8"/>
-        <rect x="12" y="0" width="3" height="10" rx="0.5" fill="#3b82f6"/>
-      </svg>
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-        <path d="M6 1C8.761 1 11 3.239 11 6S8.761 11 6 11 1 8.761 1 6 3.239 1 6 1z" stroke="#3b82f6" stroke-width="0.8"/>
-        <path d="M3 6h6M6 3v6" stroke="#3b82f6" stroke-width="0.8" opacity="0.5"/>
-      </svg>
+    <div class="wl-title" style="margin-top:24px">
+      尺度是自由，<br>不是约束
+      <span style="font-size:13px;font-weight:300;color:#4a7a8a;display:block;margin-top:8px;letter-spacing:0.5px">Understanding yourself is true freedom.</span>
+    </div>
+    <div class="wl-desc">
+      了解自己与尼古丁的真实关系，<br>
+      才能做出<strong>真正属于你的选择</strong>。<br>
+      NYMIC 用数据揭示每一口背后的身体信号——<br>
+      <span style="color:#2a4a5a;font-size:12px">Real data. Real awareness. Real choice.<br>NYMIC reveals what nicotine does to your body,<br>so every puff is a conscious decision.</span>
+    </div>
+    <button class="btn-main" onclick="goTo('pg-setup')">
+      开始使用
+      <span class="zh">Get started · Takes 30 seconds</span>
+    </button>
+    <div class="btn-skip" onclick="goApp()">跳过，直接体验 Demo · Skip to Demo →</div>
+  </div>
+</div>
+
+<!-- ══ SETUP ══ -->
+<div class="page shell hidden" id="pg-setup">
+  <div class="setup-top">
+    <div class="setup-step">STEP 1 OF 1 · 第一步</div>
+    <div class="setup-title">选择可穿戴设备<br><span style="font-size:13px;font-weight:400;color:#4a7a8a">Choose your wearable device</span></div>
+    <div class="setup-sub">NYMIC 将从这里读取你的心率与血氧数据<br><span style="color:#2a4a5a">Heart rate &amp; SpO₂ will be read from this device</span></div>
+  </div>
+  <div class="setup-body">
+    <div class="setup-card sel" id="sc-hw" onclick="pick('hw')">
+      <div class="sc-icon">⌚</div>
+      <div class="sc-body">
+        <div class="sc-name">华为手表 / 手环</div>
+        <div class="sc-desc">Huawei Watch · Band 系列<br>通过 Health Kit 读取数据</div>
+      </div>
+      <div class="sc-chk" id="chk-hw"></div>
+    </div>
+    <div class="setup-card" id="sc-mi" onclick="pick('mi')">
+      <div class="sc-icon">📿</div>
+      <div class="sc-body">
+        <div class="sc-name">小米手环（旧款）</div>
+        <div class="sc-desc">Mi Band 6 及更早版本<br>蓝牙广播直接读取心率</div>
+      </div>
+      <div class="sc-chk" id="chk-mi"></div>
+    </div>
+    <div class="setup-card" id="sc-ap" onclick="pick('ap')">
+      <div class="sc-icon">🍎</div>
+      <div class="sc-body">
+        <div class="sc-name">Apple Watch</div>
+        <div class="sc-desc">需要 iOS App（开发中）<br>Demo 阶段使用模拟数据</div>
+      </div>
+      <div class="sc-chk" id="chk-ap"></div>
+    </div>
+    <div class="setup-card" id="sc-no" onclick="pick('no')">
+      <div class="sc-icon">📱</div>
+      <div class="sc-body">
+        <div class="sc-name">暂时跳过</div>
+        <div class="sc-desc">先体验模拟数据<br>之后可在设置中随时配对</div>
+      </div>
+      <div class="sc-chk" id="chk-no"></div>
     </div>
   </div>
+  <div class="setup-foot">
+    <button class="btn-main" onclick="goConnecting()">
+      下一步，连接设备
+      <span class="zh">Next · Connect device</span>
+    </button>
+  </div>
+</div>
 
-  <!-- Top header -->
-  <div class="top-header">
-    <div>
-      <div class="logo">NYMIC</div>
-      <div class="logo-sub">Smart Nicotine Mgmt · 智能尼古丁管理</div>
-    </div>
-    <div class="device-pill">
-      <div class="device-dot"></div>
-      <span class="device-name">NM-01 · Connected</span>
+<!-- ══ CONNECTING ══ -->
+<div class="page shell hidden" id="pg-conn">
+  <div style="position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px 28px;text-align:center">
+    <div class="conn-ring"><div class="conn-inner">⌚</div></div>
+    <div class="conn-title" id="conn-title">正在搜索设备…</div>
+    <div class="conn-sub" id="conn-sub">请确保蓝牙已开启 · Searching nearby</div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div class="page shell hidden" id="pg-app">
+  <div class="sbar">
+    <div class="sbar-time" id="clock">09:41</div>
+    <div class="sbar-conn">
+      <div class="conn-dot"></div>
+      <span class="conn-lbl">NYMIC-NM01 · Connected</span>
     </div>
   </div>
+  <div class="aheader">
+    <svg viewBox="0 0 180 44" width="180" height="44" style="display:block">
+      <defs>
+        <linearGradient id="ag" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#4ade80"/>
+          <stop offset="55%" stop-color="#22d3ee"/>
+          <stop offset="100%" stop-color="#3b82f6"/>
+        </linearGradient>
+        <linearGradient id="ag2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.18"/>
+          <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.04"/>
+        </linearGradient>
+      </defs>
+      <!-- Molecule mark compact -->
+      <circle cx="20" cy="22" r="16" fill="url(#ag2)" stroke="url(#ag)" stroke-width="1"/>
+      <circle cx="20" cy="22" r="9" fill="none" stroke="url(#ag)" stroke-width="0.6" stroke-dasharray="2.5 3"/>
+      <circle cx="20" cy="7"  r="2.2" fill="#4ade80"/>
+      <circle cx="33" cy="14" r="1.9" fill="#22d3ee"/>
+      <circle cx="33" cy="30" r="1.9" fill="#22d3ee"/>
+      <circle cx="20" cy="37" r="2.2" fill="#3b82f6"/>
+      <circle cx="7"  cy="30" r="1.9" fill="#4ade80"/>
+      <circle cx="7"  cy="14" r="1.9" fill="#4ade80"/>
+      <line x1="20" y1="9"  x2="31" y2="15" stroke="url(#ag)" stroke-width="0.7" opacity="0.5"/>
+      <line x1="31" y1="15" x2="31" y2="29" stroke="url(#ag)" stroke-width="0.7" opacity="0.5"/>
+      <line x1="31" y1="29" x2="20" y2="35" stroke="url(#ag)" stroke-width="0.7" opacity="0.5"/>
+      <line x1="20" y1="35" x2="9"  y2="29" stroke="url(#ag)" stroke-width="0.7" opacity="0.5"/>
+      <line x1="9"  y1="29" x2="9"  y2="15" stroke="url(#ag)" stroke-width="0.7" opacity="0.5"/>
+      <line x1="9"  y1="15" x2="20" y2="9"  stroke="url(#ag)" stroke-width="0.7" opacity="0.5"/>
+      <circle cx="20" cy="22" r="3.5" fill="url(#ag)" opacity="0.95"/>
+      <!-- Wordmark -->
+      <text x="44" y="20" font-family="'Helvetica Neue','Arial',sans-serif"
+        font-size="18" font-weight="200" letter-spacing="4" fill="url(#ag)">NYMIC</text>
+      <text x="45" y="32" font-family="'Helvetica Neue','Arial',sans-serif"
+        font-size="6.5" font-weight="400" letter-spacing="1.5" fill="#4a7a8a">SMART NICOTINE MANAGEMENT · 智能尼古丁管理</text>
+    </svg>
+  </div>
 
-  <!-- Screen container -->
-  <div class="screens-wrap">
-    <div class="screens-inner" id="screensInner">
+  <div class="sw">
+    <div class="si" id="si">
 
-      <!-- ══ SCREEN 1: DASHBOARD ══ -->
-      <div class="screen" id="screen0">
+      <!-- HOME -->
+      <div class="sc" id="sc0">
+        <div class="hero">
+          <div class="hero-lbl">Current Status · 当前状态</div>
+          <span class="hero-emoji" id="h-emoji">😌</span>
+          <div class="hero-state" id="h-state">You're doing well</div>
+          <div class="hero-state-zh" id="h-zh">身体状态正常，设备全功率运行</div>
+          <div class="live-pill"><div class="ldot"></div><span class="ltxt">MONITORING · 监测中</span></div>
+        </div>
 
-        <!-- Heart Rate Ring -->
-        <div class="card">
-          <div class="card-title-row">
+        <div class="mrow">
+          <div class="mc">
+            <div class="mc-icon">❤️</div>
+            <div class="mc-num" id="hr-num">72<span class="mc-unit" style="font-size:13px"> bpm</span></div>
+            <div class="mc-lbl">Heart rate</div>
+            <div class="mc-lbl-zh">实时心率</div>
+            <div class="mc-sub">Baseline ~74 bpm</div>
+          </div>
+          <div class="mc">
+            <div class="mc-icon">🧠</div>
+            <div class="mc-num" id="nv-num">38<span class="mc-unit" style="font-size:13px"> ms</span></div>
+            <div class="mc-lbl">Nerve balance</div>
+            <div class="mc-lbl-zh">自主神经状态</div>
+            <div class="mc-sub" id="nv-sub">Normal · 正常</div>
+          </div>
+        </div>
+
+        <div class="pcard">
+          <div class="prow">
             <div>
-              <div class="card-title-en">Heart Rate Monitor</div>
-              <div class="card-title-zh">实时心率监测</div>
+              <div class="ptitle">Device power · 设备功率</div>
             </div>
-            <div class="badge badge-ok" id="hr-status-badge">Normal · 正常</div>
+            <div class="pval" id="pval">6.2 W</div>
           </div>
-
-          <div class="hr-ring-wrap">
-            <div class="hr-ring">
-              <svg viewBox="0 0 150 150" width="150" height="150">
-                <defs>
-                  <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#4ade80"/>
-                    <stop offset="50%" stop-color="#22d3ee"/>
-                    <stop offset="100%" stop-color="#3b82f6"/>
-                  </linearGradient>
-                </defs>
-                <!-- Track -->
-                <circle cx="75" cy="75" r="60" fill="none" stroke="#1a2d3a" stroke-width="6"/>
-                <!-- Tick marks -->
-                <circle cx="75" cy="75" r="60" fill="none" stroke="#243b4a" stroke-width="1"
-                  stroke-dasharray="2 14.8" stroke-dashoffset="0"/>
-                <!-- Progress -->
-                <circle cx="75" cy="75" r="60" fill="none" stroke="url(#ringGrad)" stroke-width="6"
-                  stroke-dasharray="283 94" stroke-dashoffset="90"
-                  stroke-linecap="round" id="hrRing"/>
-                <!-- Pulse dots -->
-                <circle cx="75" cy="15" r="4" fill="#4ade80" opacity="0.6">
-                  <animate attributeName="opacity" values="0.6;1;0.6" dur="1.5s" repeatCount="indefinite"/>
-                </circle>
-              </svg>
-              <div class="hr-center">
-                <div class="hr-num" id="hr-num">72</div>
-                <div class="hr-unit">bpm</div>
-                <div class="hr-label-zh">心率</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="live-pill">
-            <div class="live-dot"></div>
-            <span class="live-en">MONITORING</span>
-            <span class="live-zh">监测中</span>
-          </div>
+          <div class="btrack"><div class="bfill" id="bfill" style="width:62%"></div></div>
+          <div class="blbls"><span>0W</span><span>5W</span><span>10W</span></div>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-          <div class="stat-cell">
-            <div class="stat-num" id="puffs-num">14</div>
-            <div class="stat-en">Puffs today</div>
-            <div class="stat-zh">今日抽吸</div>
-          </div>
-          <div class="stat-cell">
-            <div class="stat-num">6.2<span style="font-size:12px">W</span></div>
-            <div class="stat-en">Avg. power</div>
-            <div class="stat-zh">平均功率</div>
-          </div>
-          <div class="stat-cell">
-            <div class="stat-num">2<span style="font-size:12px">x</span></div>
-            <div class="stat-en">Auto-limits</div>
-            <div class="stat-zh">自动限制</div>
-          </div>
-        </div>
-
-        <!-- Power output -->
-        <div class="card power-section">
-          <div class="card-title-row">
-            <div>
-              <div class="card-title-en">Power Output</div>
-              <div class="card-title-zh">当前功率输出</div>
-            </div>
-          </div>
-          <div class="power-row">
-            <div class="power-label-group">
-              <div class="power-en">Current · 当前</div>
-            </div>
-            <div class="power-val" id="power-val">6.2 W</div>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill" id="power-bar" style="width:62%"></div>
-          </div>
-          <div class="bar-labels">
-            <span>0W</span><span>5W</span><span>10W</span>
-          </div>
-        </div>
-
-        <!-- SpO2 -->
-        <div class="spo2-row">
-          <div class="spo2-icon">🩺</div>
-          <div class="spo2-info">
+        <div class="spo2">
+          <div class="spo2-icon">🫁</div>
+          <div style="flex:1">
             <div class="spo2-val">97<span style="font-size:12px">%</span></div>
-            <div class="spo2-en">Blood Oxygen · SpO₂</div>
-            <div class="spo2-zh">血氧饱和度</div>
+            <div class="spo2-lbl">Blood oxygen · 血氧饱和度</div>
           </div>
-          <div class="badge badge-blue">Optimal · 优良</div>
+          <div class="spo2-badge">Healthy · 正常</div>
         </div>
-
       </div>
 
-      <!-- ══ SCREEN 2: TRENDS ══ -->
-      <div class="screen" id="screen1">
+      <!-- TRENDS -->
+      <div class="sc" id="sc1">
+        <div class="thead">
+          <div class="thead-title">Your body today</div>
+          <div class="thead-sub">今日身体数据记录</div>
+        </div>
 
-        <!-- Chart card -->
-        <div class="card">
-          <div class="card-title-row">
-            <div>
-              <div class="card-title-en">Heart Rate Trend</div>
-              <div class="card-title-zh">心率趋势</div>
-            </div>
-            <div class="time-tabs">
-              <div class="time-tab active">1H</div>
-              <div class="time-tab">6H</div>
-              <div class="time-tab">24H</div>
+        <div class="ccrd">
+          <div class="clbl">
+            Heart rate · 心率趋势
+            <div class="ctabs">
+              <div class="ctab active">1H</div>
+              <div class="ctab">6H</div>
+              <div class="ctab">24H</div>
             </div>
           </div>
+          <svg viewBox="0 0 300 88" width="100%" height="88">
+            <defs>
+              <linearGradient id="cg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#4ade80"/><stop offset="50%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient>
+              <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22d3ee" stop-opacity=".18"/><stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/></linearGradient>
+            </defs>
+            <line x1="0" y1="15" x2="300" y2="15" stroke="#1a2d3a" stroke-width=".5"/>
+            <line x1="0" y1="44" x2="300" y2="44" stroke="#1a2d3a" stroke-width=".5"/>
+            <line x1="0" y1="73" x2="300" y2="73" stroke="#1a2d3a" stroke-width=".5"/>
+            <line x1="0" y1="22" x2="300" y2="22" stroke="#fb923c" stroke-width=".5" stroke-dasharray="4 3" opacity=".5"/>
+            <text x="254" y="18" font-size="7" fill="#fb923c" opacity=".7" font-family="monospace">limit</text>
+            <path d="M0,60 C25,56 40,50 60,46 C75,42 78,16 95,12 C112,8 115,46 135,54 C155,61 170,52 190,44 C205,37 215,10 235,6 C252,2 268,40 300,56 L300,88 L0,88Z" fill="url(#ag)"/>
+            <path d="M0,60 C25,56 40,50 60,46 C75,42 78,16 95,12 C112,8 115,46 135,54 C155,61 170,52 190,44 C205,37 215,10 235,6 C252,2 268,40 300,56" fill="none" stroke="url(#cg)" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="90" cy="12" r="4" fill="#fb923c"/>
+            <circle cx="232" cy="6" r="4" fill="#fb923c"/>
+            <circle cx="300" cy="56" r="4" fill="#3b82f6"/>
+            <circle cx="300" cy="56" r="8" fill="#3b82f6" opacity=".15">
+              <animate attributeName="r" values="4;10;4" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values=".2;0;.2" dur="2s" repeatCount="indefinite"/>
+            </circle>
+          </svg>
+        </div>
 
-          <div class="chart-box">
-            <div class="chart-threshold-label">Limit 95bpm</div>
-            <div class="chart-threshold" style="top:34px"></div>
-            <div class="chart-y-labels">
-              <span class="y-lbl">110</span>
-              <span class="y-lbl">85</span>
-              <span class="y-lbl">60</span>
-            </div>
-            <div class="chart-svg-wrap">
-              <svg viewBox="0 0 280 100" width="100%" height="100">
-                <defs>
-                  <linearGradient id="chartGrad" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stop-color="#4ade80"/>
-                    <stop offset="50%" stop-color="#22d3ee"/>
-                    <stop offset="100%" stop-color="#3b82f6"/>
-                  </linearGradient>
-                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.2"/>
-                    <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
-                  </linearGradient>
-                </defs>
-                <!-- Grid -->
-                <line x1="0" y1="10" x2="280" y2="10" stroke="#1a2d3a" stroke-width="0.5"/>
-                <line x1="0" y1="45" x2="280" y2="45" stroke="#1a2d3a" stroke-width="0.5"/>
-                <line x1="0" y1="80" x2="280" y2="80" stroke="#1a2d3a" stroke-width="0.5"/>
-                <!-- Area fill -->
-                <path d="M0,65 C20,60 35,55 55,50 C70,46 75,15 90,12 C105,9 110,50 130,58 C150,65 165,55 185,46 C200,38 210,8 230,5 C248,2 260,40 280,60 L280,100 L0,100 Z"
-                  fill="url(#areaGrad)"/>
-                <!-- Main line -->
-                <path d="M0,65 C20,60 35,55 55,50 C70,46 75,15 90,12 C105,9 110,50 130,58 C150,65 165,55 185,46 C200,38 210,8 230,5 C248,2 260,40 280,60"
-                  fill="none" stroke="url(#chartGrad)" stroke-width="2" stroke-linecap="round"/>
-                <!-- Spike 1 -->
-                <circle cx="82" cy="12" r="4" fill="#fb923c"/>
-                <line x1="82" y1="0" x2="82" y2="12" stroke="#fb923c" stroke-width="0.5" stroke-dasharray="2 2"/>
-                <!-- Spike 2 -->
-                <circle cx="228" cy="5" r="4" fill="#fb923c"/>
-                <line x1="228" y1="0" x2="228" y2="5" stroke="#fb923c" stroke-width="0.5" stroke-dasharray="2 2"/>
-                <!-- Current point -->
-                <circle cx="280" cy="60" r="4" fill="#3b82f6"/>
-                <circle cx="280" cy="60" r="7" fill="#3b82f6" opacity="0.2">
-                  <animate attributeName="r" values="4;9;4" dur="2s" repeatCount="indefinite"/>
-                  <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite"/>
-                </circle>
-              </svg>
-            </div>
+        <div class="estitle">What happened · 触发记录</div>
+        <div class="eitem">
+          <div class="ebar w"></div>
+          <div class="etime">09:12</div>
+          <div class="ebody">
+            <div class="emain">Heart rate spiked</div>
+            <div class="esub">心率超出基线范围 → 功率自动降低保护你</div>
+          </div>
+          <div class="eright">
+            <div class="eval w">102 bpm</div>
+            <div class="eact">→ 4.0W</div>
+          </div>
+        </div>
+        <div class="eitem">
+          <div class="ebar ok"></div>
+          <div class="etime">09:18</div>
+          <div class="ebody">
+            <div class="emain">Back to normal</div>
+            <div class="esub">心率恢复正常 → 功率自动恢复</div>
+          </div>
+          <div class="eright">
+            <div class="eval ok">84 bpm</div>
+            <div class="eact">→ 6.2W</div>
+          </div>
+        </div>
+        <div class="eitem">
+          <div class="ebar w"></div>
+          <div class="etime">09:34</div>
+          <div class="ebody">
+            <div class="emain">Nerve balance dropped</div>
+            <div class="esub">自主神经状态下降 → 功率自动降低</div>
+          </div>
+          <div class="eright">
+            <div class="eval w">↓32%</div>
+            <div class="eact">→ 4.0W</div>
           </div>
         </div>
 
-        <!-- Events -->
-        <div style="margin-bottom:8px;">
-          <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:8px;">
-            <div class="events-title">Auto-limit Events</div>
-            <div class="events-title-zh">自动限制记录</div>
-          </div>
-
-          <div class="event-row">
-            <div class="ev-indicator warn"></div>
-            <div class="ev-time">09:12</div>
-            <div class="ev-body">
-              <div class="ev-en">Heart rate exceeded limit</div>
-              <div class="ev-zh">心率超标 → 功率自动降至 4.0W</div>
-            </div>
-            <div class="ev-val-col">
-              <div class="ev-val warn">102 bpm</div>
-              <div style="font-size:8px;color:var(--muted2);font-family:'DM Mono',monospace;">→ 4.0W</div>
-            </div>
-          </div>
-
-          <div class="event-row">
-            <div class="ev-indicator ok"></div>
-            <div class="ev-time">09:18</div>
-            <div class="ev-body">
-              <div class="ev-en">Restored to normal power</div>
-              <div class="ev-zh">心率恢复正常 → 功率恢复至 6.2W</div>
-            </div>
-            <div class="ev-val-col">
-              <div class="ev-val ok">82 bpm</div>
-              <div style="font-size:8px;color:var(--muted2);font-family:'DM Mono',monospace;">→ 6.2W</div>
-            </div>
-          </div>
-
-          <div class="event-row">
-            <div class="ev-indicator warn"></div>
-            <div class="ev-time">09:34</div>
-            <div class="ev-body">
-              <div class="ev-en">Heart rate exceeded limit</div>
-              <div class="ev-zh">心率超标 → 功率自动降至 4.0W</div>
-            </div>
-            <div class="ev-val-col">
-              <div class="ev-val warn">108 bpm</div>
-              <div style="font-size:8px;color:var(--muted2);font-family:'DM Mono',monospace;">→ 4.0W</div>
-            </div>
-          </div>
+        <div class="estitle" style="margin-top:14px">This week · 本周趋势</div>
+        <div class="wsum">
+          <div class="wcell"><div class="wnum">↑12%</div><div class="wlbl">Nerve recovery</div><div class="wlbl-zh">自主神经状态改善</div></div>
+          <div class="wcell"><div class="wnum">2×</div><div class="wlbl">Triggers today</div><div class="wlbl-zh">今日触发次数</div></div>
+          <div class="wcell"><div class="wnum">97%</div><div class="wlbl">Avg blood oxygen</div><div class="wlbl-zh">平均血氧</div></div>
+          <div class="wcell"><div class="wnum">Day 14</div><div class="wlbl">Monitoring</div><div class="wlbl-zh">监测第14天</div></div>
         </div>
-
-        <!-- Summary -->
-        <div class="summary-grid">
-          <div class="sum-cell">
-            <div class="sum-num">↓18%</div>
-            <div class="sum-en">vs yesterday</div>
-            <div class="sum-zh">较昨日减少</div>
-          </div>
-          <div class="sum-cell">
-            <div class="sum-num">2x</div>
-            <div class="sum-en">Auto-limits today</div>
-            <div class="sum-zh">今日自动限制</div>
-          </div>
-          <div class="sum-cell">
-            <div class="sum-num">14</div>
-            <div class="sum-en">Total puffs</div>
-            <div class="sum-zh">今日总计</div>
-          </div>
-          <div class="sum-cell">
-            <div class="sum-num">Day 14</div>
-            <div class="sum-en">Reduction plan</div>
-            <div class="sum-zh">减量计划第14天</div>
-          </div>
-        </div>
-
       </div>
 
-      <!-- ══ SCREEN 3: SETTINGS ══ -->
-      <div class="screen" id="screen2">
-
-        <!-- Profile -->
-        <div class="profile-card">
+      <!-- SETTINGS -->
+      <div class="sc" id="sc2">
+        <div class="sprof">
           <div class="avatar">YS</div>
-          <div class="profile-info">
-            <div class="profile-name">Yu Siyang</div>
-            <div class="profile-plan-en">Reduction Plan · Active</div>
-            <div class="profile-plan-zh">减量计划进行中</div>
+          <div style="flex:1;position:relative">
+            <div class="pname">Yu Siyang</div>
+            <div class="psince">Since Mar 9, 2026</div>
+            <div class="psince-zh">监测开始于 2026年3月9日</div>
           </div>
-          <div class="profile-day">
-            <div class="day-num">14</div>
-            <div class="day-label-en">Day</div>
-            <div class="day-label-zh">天</div>
+          <div class="pday">
+            <div class="dnum">14</div>
+            <div class="dlbl">days</div>
           </div>
         </div>
 
-        <!-- Threshold settings -->
-        <div class="section-label">
-          Thresholds · <span class="section-label-zh">阈值设置</span>
-        </div>
-
-        <div class="slider-card">
-          <div class="slider-header">
+        <div class="stitle">Protection · <span>保护阈值 · Thresholds</span></div>
+        <div class="slcard">
+          <div class="sltop">
             <div>
-              <div class="slider-label-en">Heart Rate Trigger</div>
-              <div class="slider-label-zh">心率触发阈值</div>
+              <div class="slname">Heart rate trigger</div>
+              <div class="slname-zh">心率超出基线多少时触发保护</div>
             </div>
-            <div class="slider-value" id="hr-val-display">95 <span class="slider-value-unit">bpm</span></div>
+            <div class="slval" id="hrd">+15 <span class="slval-u">bpm</span></div>
           </div>
-          <div class="slider-track" id="hrSliderTrack">
-            <div class="slider-fill-grad" id="hrSliderFill" style="width:52.5%"></div>
-            <div class="slider-thumb" id="hrSliderThumb" style="left:52.5%"></div>
-          </div>
-          <div class="slider-range-labels"><span>60 bpm</span><span>100 bpm</span><span>140 bpm</span></div>
+          <div class="str" id="hrt"><div class="stf" id="hrf" style="width:50%"></div><div class="sth" id="hrh" style="left:50%"></div></div>
+          <div class="slrange"><span>+8 bpm</span><span>+20 bpm</span><span>+30 bpm</span></div>
         </div>
-
-        <div class="slider-card">
-          <div class="slider-header">
+        <div class="slcard">
+          <div class="sltop">
             <div>
-              <div class="slider-label-en">Limited Power Output</div>
-              <div class="slider-label-zh">触发后功率上限</div>
+              <div class="slname">Limited power</div>
+              <div class="slname-zh">触发保护后，功率降至</div>
             </div>
-            <div class="slider-value" id="pw-val-display">4.0 <span class="slider-value-unit">W</span></div>
+            <div class="slval" id="pwd">4.0 <span class="slval-u">W</span></div>
           </div>
-          <div class="slider-track" id="pwSliderTrack">
-            <div class="slider-fill-grad" id="pwSliderFill" style="width:30%"></div>
-            <div class="slider-thumb" id="pwSliderThumb" style="left:30%"></div>
-          </div>
-          <div class="slider-range-labels"><span>1W</span><span>5.5W</span><span>10W</span></div>
+          <div class="str" id="pwt"><div class="stf" id="pwf" style="width:33%"></div><div class="sth" id="pwh" style="left:33%"></div></div>
+          <div class="slrange"><span>1W</span><span>5W</span><span>10W</span></div>
         </div>
 
-        <!-- Toggles -->
-        <div class="section-label">
-          Alerts · <span class="section-label-zh">提醒设置</span>
-        </div>
+        <div class="stitle">Alerts · <span>提醒设置 · Notifications</span></div>
+        <div class="trow" onclick="tgl(this)"><div class="tinfo"><div class="tname">Vibrate when triggered</div><div class="tname-zh">触发保护时震动提醒</div></div><div class="tsw on"><div class="tknob"></div></div></div>
+        <div class="trow" onclick="tgl(this)"><div class="tinfo"><div class="tname">Blood oxygen safety alert</div><div class="tname-zh">血氧异常时强制提醒</div></div><div class="tsw on"><div class="tknob"></div></div></div>
+        <div class="trow" onclick="tgl(this)"><div class="tinfo"><div class="tname">Weekly recovery report</div><div class="tname-zh">每周身体恢复趋势报告</div></div><div class="tsw on"><div class="tknob"></div></div></div>
+        <div class="trow" onclick="tgl(this)"><div class="tinfo"><div class="tname">Wearable connected</div><div class="tname-zh">可穿戴设备已配对</div></div><div class="tsw on"><div class="tknob"></div></div></div>
 
-        <div class="toggle-card" onclick="toggleSwitch(this)">
-          <div class="toggle-info">
-            <div class="toggle-label-en">Haptic on limit trigger</div>
-            <div class="toggle-label-zh">触发限制时震动提醒</div>
-          </div>
-          <div class="toggle-switch on"><div class="toggle-knob"></div></div>
+        <div class="dbtn" onclick="triggerDemo()">
+          <div class="dbtn-en">⚡ Simulate protection trigger</div>
+          <div class="dbtn-zh">演示：模拟心率超标，触发功率保护</div>
         </div>
-
-        <div class="toggle-card" onclick="toggleSwitch(this)">
-          <div class="toggle-info">
-            <div class="toggle-label-en">Daily usage report</div>
-            <div class="toggle-label-zh">每日使用报告</div>
-          </div>
-          <div class="toggle-switch on"><div class="toggle-knob"></div></div>
-        </div>
-
-        <div class="toggle-card" onclick="toggleSwitch(this)">
-          <div class="toggle-info">
-            <div class="toggle-label-en">Apple Watch pairing</div>
-            <div class="toggle-label-zh">Apple Watch 配对</div>
-          </div>
-          <div class="toggle-switch off"><div class="toggle-knob"></div></div>
-        </div>
-
-        <div class="toggle-card" onclick="toggleSwitch(this)">
-          <div class="toggle-info">
-            <div class="toggle-label-en">Weekly reduction goal</div>
-            <div class="toggle-label-zh">每周减量目标提醒</div>
-          </div>
-          <div class="toggle-switch on"><div class="toggle-knob"></div></div>
-        </div>
-
-        <!-- Demo trigger -->
-        <div class="demo-trigger-btn" onclick="triggerDemo()">
-          <div class="demo-btn-en">⚡ Simulate HR Trigger</div>
-          <div class="demo-btn-zh">模拟心率超标 · 功率自动限制演示</div>
-        </div>
-
       </div>
-    </div><!-- end screens-inner -->
-  </div><!-- end screens-wrap -->
 
-  <!-- Nav bar -->
-  <div class="nav-bar">
+    </div>
+  </div>
 
-    <div class="nav-item active" onclick="goTo(0)" id="nav0">
-      <div class="nav-icon-wrap">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+  <!-- Nav -->
+  <div class="nav">
+    <div class="ni active" onclick="goNav(0)" id="n0">
+      <div class="ni-bg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="8" stroke="url(#ng)" stroke-width="1.5"/>
           <path d="M12 8v4l2 2" stroke="url(#ng)" stroke-width="1.5" stroke-linecap="round"/>
           <defs><linearGradient id="ng" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4ade80"/><stop offset="1" stop-color="#3b82f6"/></linearGradient></defs>
         </svg>
       </div>
-      <div class="nav-label-en">Home</div>
-      <div class="nav-label-zh">主页</div>
+      <div class="ni-en">Home</div><div class="ni-zh">主页</div>
     </div>
-
-    <div class="nav-item" onclick="goTo(1)" id="nav1">
-      <div class="nav-icon-wrap">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+    <div class="ni" onclick="goNav(1)" id="n1">
+      <div class="ni-bg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
           <polyline points="3,17 8,11 13,14 21,6" stroke="#4a7a8a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           <circle cx="21" cy="6" r="2" fill="#4a7a8a"/>
         </svg>
       </div>
-      <div class="nav-label-en">Trends</div>
-      <div class="nav-label-zh">趋势</div>
+      <div class="ni-en">Trends</div><div class="ni-zh">趋势</div>
     </div>
-
-    <div class="nav-item" onclick="goTo(2)" id="nav2">
-      <div class="nav-icon-wrap">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+    <div class="ni" onclick="goNav(2)" id="n2">
+      <div class="ni-bg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="8" r="3" stroke="#4a7a8a" stroke-width="1.5"/>
           <path d="M6 20v-1a6 6 0 0 1 12 0v1" stroke="#4a7a8a" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M18 10h2M20 12h-2" stroke="#4a7a8a" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
       </div>
-      <div class="nav-label-en">Settings</div>
-      <div class="nav-label-zh">设置</div>
+      <div class="ni-en">Settings</div><div class="ni-zh">设置</div>
     </div>
-
   </div>
-
-</div><!-- end app-shell -->
+</div>
 
 <script>
-// ── Clock ──
-function updateClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2,'0');
-  const m = String(now.getMinutes()).padStart(2,'0');
-  document.getElementById('clock').textContent = h + ':' + m;
-}
-updateClock();
-setInterval(updateClock, 30000);
+// Clock
+(function tick(){const n=new Date();const el=document.getElementById('clock');if(el)el.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');setTimeout(tick,30000);})();
 
-// ── Navigation ──
-let currentScreen = 0;
-function goTo(idx) {
-  currentScreen = idx;
-  document.getElementById('screensInner').style.transform = `translateX(-${idx * 100}%)`;
-  [0,1,2].forEach(i => {
-    document.getElementById('nav'+i).classList.toggle('active', i === idx);
-  });
-  // update nav icons stroke color
-  updateNavIcons();
+// Pages
+function goTo(id){
+  const cur=document.querySelector('.page:not(.hidden):not(.exit)');
+  if(cur){cur.classList.add('exit');setTimeout(()=>cur.classList.add('hidden'),400);}
+  setTimeout(()=>{const t=document.getElementById(id);t.classList.remove('hidden','exit');},50);
 }
-function updateNavIcons() {
-  const navItems = document.querySelectorAll('.nav-item');
-  navItems.forEach((item, i) => {
-    const paths = item.querySelectorAll('polyline, circle:not(.nav-icon-wrap circle), path');
-    const isActive = i === currentScreen;
-    paths.forEach(el => {
-      el.setAttribute('stroke', isActive ? 'url(#ng)' : '#4a7a8a');
-    });
+function goApp(){goTo('pg-app');setTimeout(animateHR,300);}
+
+// Setup pick
+let picked='hw';
+function pick(k){
+  picked=k;
+  ['hw','mi','ap','no'].forEach(x=>{
+    document.getElementById('sc-'+x).classList.toggle('sel',x===k);
   });
 }
 
-// ── Simulated live HR ──
-let baseHR = 72;
-let demoMode = false;
-function animateHR() {
-  if (demoMode) return;
-  const jitter = Math.round((Math.random() - 0.5) * 4);
-  baseHR = Math.max(65, Math.min(80, baseHR + jitter));
-  document.getElementById('hr-num').textContent = baseHR;
-  // Update ring arc
-  const pct = (baseHR - 40) / 160;
-  const circumference = 2 * Math.PI * 60;
-  const arc = circumference * pct;
-  document.getElementById('hrRing').setAttribute('stroke-dasharray', `${arc} ${circumference - arc}`);
-  setTimeout(animateHR, 1800);
+// Connecting
+function goConnecting(){
+  goTo('pg-conn');
+  const steps=[
+    ['正在搜索设备…','请确保蓝牙已开启 · Scanning nearby'],
+    ['发现设备，正在连接…','Found NYMIC-NM01 · Establishing connection'],
+    ['连接成功！','Connected successfully · Loading your data'],
+  ];
+  let i=0;
+  const run=()=>{
+    if(i<steps.length){
+      document.getElementById('conn-title').textContent=steps[i][0];
+      document.getElementById('conn-sub').textContent=steps[i][1];
+      i++;setTimeout(run,950);
+    } else {setTimeout(()=>{goApp();},350);}
+  };
+  run();
 }
-animateHR();
 
-// ── Demo trigger ──
-function triggerDemo() {
-  if (demoMode) return;
-  demoMode = true;
+// Nav
+let cur=0;
+function goNav(i){
+  cur=i;
+  document.getElementById('si').style.transform=`translateX(-${i*100}%)`;
+  [0,1,2].forEach(j=>document.getElementById('n'+j).classList.toggle('active',j===i));
+}
 
-  // Update HR to spike
-  document.getElementById('hr-num').textContent = '102';
-  document.getElementById('hr-status-badge').textContent = 'Limit Active · 限制中';
-  document.getElementById('hr-status-badge').className = 'badge badge-warn';
+// Swipe
+let tx=0;
+const sw=document.querySelector('.sw');
+if(sw){
+  sw.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+  sw.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-tx;
+    if(Math.abs(dx)>60){if(dx<0&&cur<2)goNav(cur+1);else if(dx>0&&cur>0)goNav(cur-1);}
+  },{passive:true});
+}
 
-  // Animate ring to warn color
-  const ring = document.getElementById('hrRing');
-  ring.setAttribute('stroke', '#fb923c');
-  ring.removeAttribute('stroke');
-  // set dasharray for 102
-  const pct = (102 - 40) / 160;
-  const circumference = 2 * Math.PI * 60;
-  const arc = circumference * pct;
-  ring.setAttribute('stroke-dasharray', `${arc} ${circumference - arc}`);
+// HR animation
+let bhr=72,demo=false;
+function animateHR(){
+  if(demo)return;
+  const j=Math.round((Math.random()-.5)*4);
+  bhr=Math.max(66,Math.min(80,bhr+j));
+  const el=document.getElementById('hr-num');
+  if(el)el.innerHTML=bhr+'<span class="mc-unit" style="font-size:13px"> bpm</span>';
+  setTimeout(animateHR,2000);
+}
 
-  // Power drop
-  document.getElementById('power-val').textContent = '4.0 W';
-  document.getElementById('power-bar').style.width = '40%';
-  document.getElementById('power-bar').style.background = 'linear-gradient(90deg, #fb923c, #f87171)';
-
-  // Show toast
-  const toast = document.getElementById('toast');
-  toast.classList.add('show');
-
-  // Puff count tick
-  const puffEl = document.getElementById('puffs-num');
-  const curr = parseInt(puffEl.textContent);
-  puffEl.textContent = curr + 1;
-
-  // Auto-recover after 3.5s
-  setTimeout(() => {
-    toast.classList.remove('show');
-
-    setTimeout(() => {
-      demoMode = false;
-      baseHR = 74;
-      document.getElementById('hr-num').textContent = '74';
-      document.getElementById('hr-status-badge').textContent = 'Normal · 正常';
-      document.getElementById('hr-status-badge').className = 'badge badge-ok';
-      document.getElementById('power-val').textContent = '6.2 W';
-      document.getElementById('power-bar').style.width = '62%';
-      document.getElementById('power-bar').style.background = 'linear-gradient(135deg, #4ade80, #22d3ee, #3b82f6)';
+// Demo
+function triggerDemo(){
+  if(demo)return;
+  demo=true;
+  document.getElementById('h-emoji').textContent='⚡';
+  document.getElementById('h-state').textContent='Protecting you now';
+  document.getElementById('h-zh').textContent='检测到心率超标，功率已自动降低保护你';
+  document.getElementById('hr-num').innerHTML='102<span class="mc-unit" style="font-size:13px"> bpm</span>';
+  document.getElementById('nv-num').innerHTML='26<span class="mc-unit" style="font-size:13px"> ms</span>';
+  document.getElementById('nv-sub').textContent='Elevated · 偏高';
+  document.getElementById('pval').textContent='4.0 W';
+  document.getElementById('bfill').style.width='40%';
+  document.getElementById('bfill').style.background='linear-gradient(90deg,#fb923c,#f87171)';
+  const t=document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(()=>{
+    t.classList.remove('show');
+    setTimeout(()=>{
+      demo=false;bhr=74;
+      document.getElementById('h-emoji').textContent='😌';
+      document.getElementById('h-state').textContent="You're doing well";
+      document.getElementById('h-zh').textContent='身体状态正常，设备全功率运行';
+      document.getElementById('hr-num').innerHTML='74<span class="mc-unit" style="font-size:13px"> bpm</span>';
+      document.getElementById('nv-num').innerHTML='38<span class="mc-unit" style="font-size:13px"> ms</span>';
+      document.getElementById('nv-sub').textContent='Normal · 正常';
+      document.getElementById('pval').textContent='6.2 W';
+      document.getElementById('bfill').style.width='62%';
+      document.getElementById('bfill').style.background='linear-gradient(135deg,#4ade80,#22d3ee,#3b82f6)';
       animateHR();
-    }, 600);
-  }, 3500);
+    },500);
+  },3500);
 }
 
-// ── Toggle switches ──
-function toggleSwitch(card) {
-  const sw = card.querySelector('.toggle-switch');
-  sw.classList.toggle('on');
-  sw.classList.toggle('off');
-}
+// Toggles
+function tgl(card){const s=card.querySelector('.tsw');s.classList.toggle('on');s.classList.toggle('off');}
 
-// ── Sliders ──
-function initSlider(trackId, fillId, thumbId, displayId, minVal, maxVal, initVal, unit, decimals) {
-  const track = document.getElementById(trackId);
-  const fill = document.getElementById(fillId);
-  const thumb = document.getElementById(thumbId);
-  const display = document.getElementById(displayId);
-  let dragging = false;
-
-  function setPercent(pct) {
-    pct = Math.max(0, Math.min(1, pct));
-    const val = minVal + pct * (maxVal - minVal);
-    fill.style.width = (pct * 100) + '%';
-    thumb.style.left = (pct * 100) + '%';
-    display.innerHTML = val.toFixed(decimals) + ' <span class="slider-value-unit">' + unit + '</span>';
+// Sliders
+function initSl(tid,fid,hid,did,mn,mx,iv,unit,dec,pre){
+  const tr=document.getElementById(tid),fi=document.getElementById(fid),th=document.getElementById(hid),di=document.getElementById(did);
+  let drag=false;
+  function set(p){
+    p=Math.max(0,Math.min(1,p));
+    const v=mn+p*(mx-mn);
+    fi.style.width=(p*100)+'%';th.style.left=(p*100)+'%';
+    di.innerHTML=(pre||'')+v.toFixed(dec)+' <span class="slval-u">'+unit+'</span>';
   }
-
-  function getPercent(e) {
-    const rect = track.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    return (clientX - rect.left) / rect.width;
-  }
-
-  track.addEventListener('touchstart', e => { dragging = true; setPercent(getPercent(e)); e.preventDefault(); }, {passive:false});
-  document.addEventListener('touchmove', e => { if(dragging) { setPercent(getPercent(e)); e.preventDefault(); } }, {passive:false});
-  document.addEventListener('touchend', () => dragging = false);
-  track.addEventListener('mousedown', e => { dragging = true; setPercent(getPercent(e)); });
-  document.addEventListener('mousemove', e => { if(dragging) setPercent(getPercent(e)); });
-  document.addEventListener('mouseup', () => dragging = false);
-
-  // init
-  const initPct = (initVal - minVal) / (maxVal - minVal);
-  setPercent(initPct);
+  function gp(e){const r=tr.getBoundingClientRect();return((e.touches?e.touches[0].clientX:e.clientX)-r.left)/r.width;}
+  tr.addEventListener('touchstart',e=>{drag=true;set(gp(e));e.preventDefault();},{passive:false});
+  document.addEventListener('touchmove',e=>{if(drag){set(gp(e));e.preventDefault();}},{passive:false});
+  document.addEventListener('touchend',()=>drag=false);
+  tr.addEventListener('mousedown',e=>{drag=true;set(gp(e));});
+  document.addEventListener('mousemove',e=>{if(drag)set(gp(e));});
+  document.addEventListener('mouseup',()=>drag=false);
+  set((iv-mn)/(mx-mn));
 }
+initSl('hrt','hrf','hrh','hrd',8,30,15,'bpm',0,'+');
+initSl('pwt','pwf','pwh','pwd',1,10,4,'W',1);
 
-initSlider('hrSliderTrack','hrSliderFill','hrSliderThumb','hr-val-display', 60, 140, 95, 'bpm', 0);
-initSlider('pwSliderTrack','pwSliderFill','pwSliderThumb','pw-val-display', 1, 10, 4.0, 'W', 1);
-
-// ── Time tabs ──
-document.querySelectorAll('.time-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.time-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-  });
+// Chart tabs
+document.querySelectorAll('.ctab').forEach(t=>{
+  t.addEventListener('click',()=>{document.querySelectorAll('.ctab').forEach(x=>x.classList.remove('active'));t.classList.add('active');});
 });
-
-// ── Swipe gesture ──
-let touchStartX = 0;
-const screensWrap = document.querySelector('.screens-wrap');
-screensWrap.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive:true});
-screensWrap.addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].clientX - touchStartX;
-  if (Math.abs(dx) > 60) {
-    if (dx < 0 && currentScreen < 2) goTo(currentScreen + 1);
-    else if (dx > 0 && currentScreen > 0) goTo(currentScreen - 1);
-  }
-}, {passive:true});
 </script>
 </body>
 </html>
