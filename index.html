@@ -123,6 +123,26 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
 .spo2-icon{font-size:19px}
 .spo2-val{font-family:'DM Mono',monospace;font-size:18px;color:var(--g3);font-weight:400}
 .spo2-lbl{font-size:10px;color:var(--muted2)}
+
+/* Tooltip system */
+.qmark{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;color:rgba(34,211,238,0.45);font-size:11px;cursor:pointer;margin-left:3px;vertical-align:middle;flex-shrink:0;transition:color .2s;font-style:normal;line-height:1}
+.qmark:active{color:rgba(34,211,238,0.9)}
+.tooltip-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;pointer-events:none;opacity:0;transition:opacity .2s}
+.tooltip-overlay.show{opacity:1;pointer-events:all}
+.tooltip-bg{position:absolute;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.tooltip-card{position:relative;width:100%;max-width:340px;background:#0d1e2a;border:0.5px solid rgba(255,255,255,0.1);border-radius:24px;padding:24px;transform:scale(0.94);transition:transform .25s cubic-bezier(.34,1.4,.64,1)}
+.tooltip-overlay.show .tooltip-card{transform:scale(1)}
+.tooltip-card::before{content:'';position:absolute;top:0;left:20%;right:20%;height:0.5px;background:linear-gradient(90deg,transparent,rgba(34,211,238,0.35),transparent)}
+.tooltip-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.tooltip-icon{font-size:32px;line-height:1}
+.tooltip-titles{}
+.tooltip-en{font-size:16px;font-weight:500;color:rgba(255,255,255,0.92);margin-bottom:2px}
+.tooltip-zh{font-size:13px;color:rgba(205,232,240,0.6);font-family:'Noto Sans SC',sans-serif;font-weight:300}
+.tooltip-divider{height:0.5px;background:rgba(255,255,255,0.07);margin-bottom:14px}
+.tooltip-desc{font-size:13px;color:rgba(205,232,240,0.75);line-height:1.75;margin-bottom:10px}
+.tooltip-desc-zh{font-size:13px;color:rgba(205,232,240,0.6);font-family:'Noto Sans SC',sans-serif;font-weight:300;line-height:1.75;padding-top:8px;border-top:0.5px solid rgba(255,255,255,0.06)}
+.tooltip-close{width:100%;margin-top:18px;padding:12px;border-radius:14px;background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:13px;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:0.3px;transition:background .2s}
+.tooltip-close:active{background:rgba(255,255,255,0.1)}
 .spo2-badge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:12px;background:rgba(59,130,246,.1);border:.5px solid rgba(59,130,246,.2);color:var(--g3)}
 
 /* TRENDS */
@@ -214,6 +234,24 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
   <div>
     <div class="tst-en">Heart rate spike — power reduced</div>
     <div class="tst-zh">检测到心率超标，功率已自动降低</div>
+  </div>
+</div>
+
+<!-- Tooltip overlay -->
+<div class="tooltip-overlay" id="tt-overlay" onclick="closeTooltip(event)">
+  <div class="tooltip-bg"></div>
+  <div class="tooltip-card">
+    <div class="tooltip-header">
+      <div class="tooltip-icon" id="tt-icon">❤️</div>
+      <div class="tooltip-titles">
+        <div class="tooltip-en" id="tt-en">Heart Rate</div>
+        <div class="tooltip-zh" id="tt-zh">实时心率</div>
+      </div>
+    </div>
+    <div class="tooltip-divider"></div>
+    <div class="tooltip-desc" id="tt-desc"></div>
+    <div class="tooltip-desc-zh" id="tt-desc-zh"></div>
+    <button class="tooltip-close" onclick="document.getElementById('tt-overlay').classList.remove('show')">知道了 · Got it</button>
   </div>
 </div>
 
@@ -444,12 +482,18 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
           <div class="mc">
             <div class="mc-icon">❤️</div>
             <div class="mc-num" id="hr-num">72<span class="mc-unit" style="font-size:13px"> bpm</span></div>
-            <div class="mc-lbl">Heart rate</div>
+            <div style="display:flex;align-items:center;gap:3px">
+              <div class="mc-lbl">Heart rate</div>
+              <i class="qmark" onclick="showTooltip('hr')">&#9432;</i>
+            </div>
             <div class="mc-lbl-zh">实时心率</div>
             <div class="mc-sub">Baseline ~74 bpm</div>
           </div>
           <div class="mc" style="padding:12px 10px">
-            <div class="mc-lbl" style="margin-bottom:6px">Stress Level</div>
+            <div style="display:flex;align-items:center;gap:3px;margin-bottom:6px">
+              <div class="mc-lbl">Stress Level</div>
+              <i class="qmark" onclick="showTooltip('stress')">&#9432;</i>
+            </div>
             <div class="mc-lbl-zh" style="margin-bottom:8px">压力指数</div>
             <!-- Gauge -->
             <svg id="gauge-svg" viewBox="0 0 100 58" width="100%" style="display:block;margin-bottom:4px">
@@ -487,7 +531,10 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
         <div class="pcard">
           <div class="prow">
             <div>
+              <div style="display:flex;align-items:center;gap:3px">
               <div class="ptitle">Device power · 设备功率</div>
+              <i class="qmark" onclick="showTooltip('power')">&#9432;</i>
+            </div>
             </div>
             <div class="pval" id="pval">6.2 W</div>
           </div>
@@ -499,7 +546,10 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
           <div class="spo2-icon">🫁</div>
           <div style="flex:1">
             <div class="spo2-val">97<span style="font-size:12px">%</span></div>
-            <div class="spo2-lbl">Blood oxygen · 血氧饱和度</div>
+            <div style="display:flex;align-items:center;gap:3px">
+              <div class="spo2-lbl">Blood oxygen · 血氧饱和度</div>
+              <i class="qmark" onclick="showTooltip('spo2')">&#9432;</i>
+            </div>
           </div>
           <div class="spo2-badge">Healthy · 正常</div>
         </div>
@@ -809,8 +859,45 @@ function triggerDemo(){
   },3500);
 }
 
-// Toggles
-function tgl(card){const s=card.querySelector('.tsw');s.classList.toggle('on');s.classList.toggle('off');}
+// Tooltips
+const ttData={
+  hr:{
+    icon:'❤️',en:'Heart Rate',zh:'实时心率',
+    desc:'Your heart beats faster when nicotine stimulates your nervous system. NYMIC monitors this in real time — if your heart rate rises more than 15 bpm above your personal baseline, the device automatically reduces power output to protect you.',
+    descZh:'尼古丁刺激神经系统时心跳会加快。NYMIC实时监测你的心率，当超出个人基线15bpm以上时，设备自动降低功率保护你。'
+  },
+  stress:{
+    icon:'🧠',en:'Stress Level',zh:'压力指数',
+    desc:'Derived from Heart Rate Variability (HRV) — a measure of how well your nervous system is balancing stress and recovery. A high stress level means nicotine is actively exciting your nervous system. Lower is better.',
+    descZh:'来源于心率变异性（HRV）——衡量你的神经系统在压力与恢复之间的平衡状态。压力指数高说明尼古丁正在刺激你的神经系统，数值越低状态越好。'
+  },
+  power:{
+    icon:'⚡',en:'Device Power Output',zh:'设备功率输出',
+    desc:'The heating power of your NYMIC device in watts (W). Higher power produces more vapour and delivers more nicotine per puff. NYMIC automatically reduces this when your biometrics indicate your body needs a break.',
+    descZh:'NYMIC设备的加热功率（瓦特）。功率越高每口产生的蒸汽和尼古丁摄入量越大。当生理数据显示你的身体需要休息时，NYMIC会自动降低功率。'
+  },
+  spo2:{
+    icon:'🫁',en:'Blood Oxygen (SpO₂)',zh:'血氧饱和度',
+    desc:'The percentage of oxygen carried in your blood. A healthy reading is 97–100%. If SpO₂ drops below 95%, NYMIC will lock the device and alert you to stop using and consult a doctor. This is your safety baseline.',
+    descZh:'血液中携带氧气的比例。健康范围为97–100%。如果血氧低于95%，NYMIC会锁定设备并提醒你停止使用，这是你的安全底线。'
+  }
+};
+function showTooltip(key){
+  const d=ttData[key];
+  document.getElementById('tt-icon').textContent=d.icon;
+  document.getElementById('tt-en').textContent=d.en;
+  document.getElementById('tt-zh').textContent=d.zh;
+  document.getElementById('tt-desc').textContent=d.desc;
+  document.getElementById('tt-desc-zh').textContent=d.descZh;
+  document.getElementById('tt-overlay').classList.add('show');
+}
+function closeTooltip(e){
+  if(!e){document.getElementById('tt-overlay').classList.remove('show');return;}
+  const card=document.querySelector('.tooltip-card');
+  if(card&&!card.contains(e.target)){
+    document.getElementById('tt-overlay').classList.remove('show');
+  }
+}
 
 // Sliders
 function initSl(tid,fid,hid,did,mn,mx,iv,unit,dec,pre){
@@ -834,7 +921,8 @@ function initSl(tid,fid,hid,did,mn,mx,iv,unit,dec,pre){
 initSl('hrt','hrf','hrh','hrd',8,30,15,'bpm',0,'+');
 initSl('pwt','pwf','pwh','pwd',1,10,4,'W',1);
 
-// Chart tabs
+// Toggles
+function tgl(card){const s=card.querySelector('.tsw');s.classList.toggle('on');s.classList.toggle('off');}
 document.querySelectorAll('.ctab').forEach(t=>{
   t.addEventListener('click',()=>{document.querySelectorAll('.ctab').forEach(x=>x.classList.remove('active'));t.classList.add('active');});
 });
