@@ -154,6 +154,8 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
 .ctabs{display:flex;gap:4px}
 .ctab{font-size:9px;padding:2px 8px;border-radius:8px;color:var(--muted2);cursor:pointer}
 .ctab.active{background:rgba(34,211,238,.1);color:var(--g2);border:.5px solid rgba(34,211,238,.2)}
+.mtab{flex:1;text-align:center;padding:8px 6px;border-radius:12px;font-size:11px;color:var(--muted2);background:var(--bg2);border:.5px solid var(--border);cursor:pointer;transition:all .2s;font-family:'Noto Sans SC',sans-serif;font-weight:300}
+.mtab.active{background:color-mix(in srgb,#22d3ee 8%,var(--bg2));border-color:rgba(34,211,238,.3);color:var(--text)}
 .estitle{font-size:10px;font-weight:600;letter-spacing:.8px;color:var(--muted2);font-family:'DM Mono',monospace;text-transform:uppercase;margin-bottom:7px;margin-top:3px}
 .eitem{background:var(--bg2);border:.5px solid var(--border);border-radius:12px;padding:11px 13px;margin-bottom:7px;display:flex;gap:9px;align-items:flex-start}
 .ebar{width:3px;border-radius:2px;flex-shrink:0;align-self:stretch}
@@ -232,8 +234,8 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
 <div class="toast" id="toast">
   <div class="tst-icon">⚡</div>
   <div>
-    <div class="tst-en">Heart rate spike — power reduced</div>
-    <div class="tst-zh">检测到心率超标，功率已自动降低</div>
+    <div class="tst-en">Body signal detected — power eased</div>
+    <div class="tst-zh">检测到生理信号，已自动降低功率</div>
   </div>
 </div>
 
@@ -315,23 +317,23 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
       开始使用
       <span class="zh">Get started · Takes 30 seconds</span>
     </button>
-    <div class="btn-skip" onclick="goApp()">跳过，直接体验 Demo · Skip to Demo →</div>
+    <div class="btn-skip" onclick="goApp()">直接体验 · Skip</div>
   </div>
 </div>
 
 <!-- ══ SETUP ══ -->
 <div class="page shell hidden" id="pg-setup">
   <div class="setup-top">
-    <div class="setup-step">STEP 1 OF 2 · 第一步，共两步</div>
+    <div class="setup-step">STEP 1 / 2</div>
     <div class="setup-title">选择可穿戴设备<br><span style="font-size:13px;font-weight:400;color:#4a7a8a">Choose your wearable device</span></div>
-    <div class="setup-sub">NYMIC 将从这里读取你的心率与血氧数据<br><span style="color:#2a4a5a">Heart rate &amp; SpO₂ will be read from this device</span></div>
+    <div class="setup-sub">从这里读取心率与血氧<br><span style="color:#2a4a5a">Reads heart rate &amp; SpO₂</span></div>
   </div>
   <div class="setup-body">
     <div class="setup-card sel" id="sc-hw" onclick="pick('hw')">
       <div class="sc-icon">⌚</div>
       <div class="sc-body">
         <div class="sc-name">华为手表 / 手环</div>
-        <div class="sc-desc">Huawei Watch · Band 系列<br>通过 Health Kit 读取数据</div>
+        <div class="sc-desc">Huawei Watch · Band 系列<br>via Huawei Health Kit</div>
       </div>
       <div class="sc-chk" id="chk-hw"></div>
     </div>
@@ -339,7 +341,7 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
       <div class="sc-icon">📿</div>
       <div class="sc-body">
         <div class="sc-name">小米手环（旧款）</div>
-        <div class="sc-desc">Mi Band 6 及更早版本<br>蓝牙广播直接读取心率</div>
+        <div class="sc-desc">Mi Band 6 及更早版本<br>via BLE broadcast</div>
       </div>
       <div class="sc-chk" id="chk-mi"></div>
     </div>
@@ -373,8 +375,8 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
   <div style="position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px 28px;text-align:center">
     <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1.5px;margin-bottom:28px">STEP 1 OF 2 · 连接可穿戴设备</div>
     <div class="conn-ring"><div class="conn-inner">⌚</div></div>
-    <div class="conn-title" id="conn-title">正在搜索手环…</div>
-    <div class="conn-sub" id="conn-sub">请确保蓝牙已开启 · Searching nearby</div>
+    <div class="conn-title" id="conn-title">Looking for your wearable…</div>
+    <div class="conn-sub" id="conn-sub">请确保蓝牙已打开</div>
   </div>
 </div>
 
@@ -387,7 +389,7 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
     <!-- Watch connected badge -->
     <div style="display:flex;align-items:center;gap:8px;background:rgba(74,222,128,0.08);border:0.5px solid rgba(74,222,128,0.2);border-radius:20px;padding:6px 14px;margin-bottom:32px">
       <div style="width:7px;height:7px;border-radius:50%;background:var(--g1)"></div>
-      <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--g1)" id="watch-badge">手环已连接 · Wearable connected</span>
+      <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--g1)" id="watch-badge">✓ 手环已连接</span>
     </div>
 
     <!-- NYMIC device animation -->
@@ -409,8 +411,8 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
       </div>
     </div>
 
-    <div class="conn-title" id="device-title">正在搜索 NYMIC 设备…</div>
-    <div class="conn-sub" id="device-sub">请确保设备已开机 · Power on your NYMIC device</div>
+    <div class="conn-title" id="device-title">Looking for NYMIC device…</div>
+    <div class="conn-sub" id="device-sub">请确保设备已开机</div>
 
     <!-- Scanning progress bar -->
     <div style="width:180px;height:2px;background:var(--bg3);border-radius:1px;margin-top:24px;overflow:hidden">
@@ -473,8 +475,8 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
         <div class="hero">
           <div class="hero-lbl">Current Status · 当前状态</div>
           <span class="hero-emoji" id="h-emoji">😌</span>
-          <div class="hero-state" id="h-state">You're doing well</div>
-          <div class="hero-state-zh" id="h-zh">身体状态正常，设备全功率运行</div>
+          <div class="hero-state" id="h-state">All clear</div>
+          <div class="hero-state-zh" id="h-zh">一切正常，正在监测</div>
           <div class="live-pill"><div class="ldot"></div><span class="ltxt">MONITORING · 监测中</span></div>
         </div>
 
@@ -487,7 +489,7 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
               <i class="qmark" onclick="showTooltip('hr')">&#9432;</i>
             </div>
             <div class="mc-lbl-zh">实时心率</div>
-            <div class="mc-sub">Baseline ~74 bpm</div>
+            <div class="mc-sub">基线 ~74 bpm</div>
           </div>
           <div class="mc" style="padding:12px 10px">
             <div style="display:flex;align-items:center;gap:3px;margin-bottom:6px">
@@ -524,7 +526,7 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
               <text x="44" y="9"  font-size="7" fill="#f0e040" font-family="monospace">中</text>
               <text x="84" y="57" font-size="7" fill="#ff4444" font-family="monospace">高</text>
             </svg>
-            <div class="mc-sub" id="nv-sub" style="text-align:center">Relaxed · 放松</div>
+            <div class="mc-sub" id="nv-sub" style="text-align:center">放松</div>
           </div>
         </div>
 
@@ -532,7 +534,7 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
           <div class="prow">
             <div>
               <div style="display:flex;align-items:center;gap:3px">
-              <div class="ptitle">Device power · 设备功率</div>
+              <div class="ptitle">Power output</div>
               <i class="qmark" onclick="showTooltip('power')">&#9432;</i>
             </div>
             </div>
@@ -547,97 +549,185 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
           <div style="flex:1">
             <div class="spo2-val">97<span style="font-size:12px">%</span></div>
             <div style="display:flex;align-items:center;gap:3px">
-              <div class="spo2-lbl">Blood oxygen · 血氧饱和度</div>
+              <div class="spo2-lbl">Blood oxygen</div>
               <i class="qmark" onclick="showTooltip('spo2')">&#9432;</i>
             </div>
           </div>
-          <div class="spo2-badge">Healthy · 正常</div>
+          <div class="spo2-badge">正常</div>
         </div>
       </div>
 
       <!-- TRENDS -->
       <div class="sc" id="sc1">
         <div class="thead">
-          <div class="thead-title">Your body today</div>
-          <div class="thead-sub">今日身体数据记录</div>
+          <div class="thead-title">Today's readings</div>
+          <div class="thead-sub">今日数据</div>
         </div>
 
-        <div class="ccrd">
-          <div class="clbl">
-            Heart rate · 心率趋势
-            <div class="ctabs">
-              <div class="ctab active">1H</div>
-              <div class="ctab">6H</div>
-              <div class="ctab">24H</div>
+        <!-- Metric selector tabs -->
+        <div style="display:flex;gap:6px;margin-bottom:12px">
+          <div class="mtab active" id="mt-hr" onclick="switchMetric('hr')">❤️ 心率</div>
+          <div class="mtab" id="mt-stress" onclick="switchMetric('stress')">🧠 压力</div>
+          <div class="mtab" id="mt-spo2" onclick="switchMetric('spo2')">🫁 血氧</div>
+        </div>
+
+        <!-- ── HR panel ── -->
+        <div id="mp-hr">
+          <div class="ccrd">
+            <div class="clbl">
+              Heart rate · 心率
+              <div style="font-family:'DM Mono',monospace;font-size:10px;color:#22d3ee">72 bpm now</div>
             </div>
+            <svg viewBox="0 0 300 96" width="100%" height="96">
+              <defs>
+                <linearGradient id="cg-hr" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#22d3ee"/></linearGradient>
+                <linearGradient id="ag-hr" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4ade80" stop-opacity=".1"/><stop offset="100%" stop-color="#4ade80" stop-opacity="0"/></linearGradient>
+              </defs>
+              <line x1="20" y1="8"  x2="285" y2="8"  stroke="#1a2d3a" stroke-width=".5"/>
+              <line x1="20" y1="30" x2="285" y2="30" stroke="#1a2d3a" stroke-width=".5"/>
+              <line x1="20" y1="52" x2="285" y2="52" stroke="#1a2d3a" stroke-width=".5"/>
+              <line x1="20" y1="74" x2="285" y2="74" stroke="#1a2d3a" stroke-width=".5"/>
+              <line x1="20" y1="16" x2="285" y2="16" stroke="#fb923c" stroke-width=".5" stroke-dasharray="4 3" opacity=".5"/>
+              <text x="230" y="13" font-size="7" fill="#fb923c" opacity=".7" font-family="monospace">+15 bpm</text>
+              <text x="2" y="11"  font-size="7" fill="#2a4a5a" font-family="monospace">110</text>
+              <text x="2" y="33"  font-size="7" fill="#2a4a5a" font-family="monospace">95</text>
+              <text x="2" y="55"  font-size="7" fill="#2a4a5a" font-family="monospace">80</text>
+              <text x="2" y="77"  font-size="7" fill="#2a4a5a" font-family="monospace">65</text>
+              <line x1="108" y1="8" x2="108" y2="74" stroke="#fb923c" stroke-width=".5" stroke-dasharray="2 3" opacity=".25"/>
+              <line x1="152" y1="8" x2="152" y2="74" stroke="#4ade80" stroke-width=".5" stroke-dasharray="2 3" opacity=".25"/>
+              <path d="M20,52 C50,50 80,48 108,14 C122,28 138,44 152,44 C185,44 225,46 260,48 C268,49 275,50 278,50"
+                fill="none" stroke="url(#cg-hr)" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M20,52 C50,50 80,48 108,14 C122,28 138,44 152,44 C185,44 225,46 260,48 C268,49 275,50 278,50 L278,74 L20,74Z"
+                fill="url(#ag-hr)"/>
+              <circle cx="108" cy="14" r="4" fill="#fb923c"/>
+              <circle cx="152" cy="44" r="4" fill="#4ade80"/>
+              <circle cx="278" cy="50" r="3.5" fill="#22d3ee"/>
+              <circle cx="278" cy="50" r="7" fill="#22d3ee" opacity=".1"><animate attributeName="r" values="3;8;3" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;0;.15" dur="2s" repeatCount="indefinite"/></circle>
+              <line x1="20"  y1="74" x2="20"  y2="79" stroke="#2a4a5a" stroke-width=".5"/>
+              <line x1="108" y1="74" x2="108" y2="79" stroke="#fb923c" stroke-width=".5" opacity=".6"/>
+              <line x1="152" y1="74" x2="152" y2="79" stroke="#4ade80" stroke-width=".5" opacity=".6"/>
+              <line x1="278" y1="74" x2="278" y2="79" stroke="#2a4a5a" stroke-width=".5"/>
+              <text x="10"  y="88" font-size="7" fill="#2a4a5a" font-family="monospace">09:00</text>
+              <text x="88"  y="88" font-size="7" fill="#fb923c" font-family="monospace" opacity=".8">09:12</text>
+              <text x="133" y="88" font-size="7" fill="#4ade80" font-family="monospace" opacity=".8">09:18</text>
+              <text x="256" y="88" font-size="7" fill="#2a4a5a" font-family="monospace">09:41</text>
+            </svg>
           </div>
-          <svg viewBox="0 0 300 88" width="100%" height="88">
-            <defs>
-              <linearGradient id="cg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#4ade80"/><stop offset="50%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient>
-              <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22d3ee" stop-opacity=".18"/><stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/></linearGradient>
-            </defs>
-            <line x1="0" y1="15" x2="300" y2="15" stroke="#1a2d3a" stroke-width=".5"/>
-            <line x1="0" y1="44" x2="300" y2="44" stroke="#1a2d3a" stroke-width=".5"/>
-            <line x1="0" y1="73" x2="300" y2="73" stroke="#1a2d3a" stroke-width=".5"/>
-            <line x1="0" y1="22" x2="300" y2="22" stroke="#fb923c" stroke-width=".5" stroke-dasharray="4 3" opacity=".5"/>
-            <text x="254" y="18" font-size="7" fill="#fb923c" opacity=".7" font-family="monospace">limit</text>
-            <path d="M0,60 C25,56 40,50 60,46 C75,42 78,16 95,12 C112,8 115,46 135,54 C155,61 170,52 190,44 C205,37 215,10 235,6 C252,2 268,40 300,56 L300,88 L0,88Z" fill="url(#ag)"/>
-            <path d="M0,60 C25,56 40,50 60,46 C75,42 78,16 95,12 C112,8 115,46 135,54 C155,61 170,52 190,44 C205,37 215,10 235,6 C252,2 268,40 300,56" fill="none" stroke="url(#cg)" stroke-width="2" stroke-linecap="round"/>
-            <circle cx="90" cy="12" r="4" fill="#fb923c"/>
-            <circle cx="232" cy="6" r="4" fill="#fb923c"/>
-            <circle cx="300" cy="56" r="4" fill="#3b82f6"/>
-            <circle cx="300" cy="56" r="8" fill="#3b82f6" opacity=".15">
-              <animate attributeName="r" values="4;10;4" dur="2s" repeatCount="indefinite"/>
-              <animate attributeName="opacity" values=".2;0;.2" dur="2s" repeatCount="indefinite"/>
-            </circle>
-          </svg>
-        </div>
-
-        <div class="estitle">What happened · 触发记录</div>
-        <div class="eitem">
-          <div class="ebar w"></div>
-          <div class="etime">09:12</div>
-          <div class="ebody">
-            <div class="emain">Heart rate spiked</div>
-            <div class="esub">心率超出基线范围 → 功率自动降低保护你</div>
+          <div class="estitle">触发记录</div>
+          <div class="eitem">
+            <div class="ebar w"></div>
+            <div class="etime">09:12</div>
+            <div class="ebody"><div class="emain">Heart rate above baseline</div><div class="esub">心率超出基线，功率自动调整</div></div>
+            <div class="eright"><div class="eval w">102 bpm</div><div class="eact">→ 4.0W</div></div>
           </div>
-          <div class="eright">
-            <div class="eval w">102 bpm</div>
-            <div class="eact">→ 4.0W</div>
-          </div>
-        </div>
-        <div class="eitem">
-          <div class="ebar ok"></div>
-          <div class="etime">09:18</div>
-          <div class="ebody">
-            <div class="emain">Back to normal</div>
-            <div class="esub">心率恢复正常 → 功率自动恢复</div>
-          </div>
-          <div class="eright">
-            <div class="eval ok">84 bpm</div>
-            <div class="eact">→ 6.2W</div>
-          </div>
-        </div>
-        <div class="eitem">
-          <div class="ebar w"></div>
-          <div class="etime">09:34</div>
-          <div class="ebody">
-            <div class="emain">Stress level spiked</div>
-            <div class="esub">压力指数上升 → 功率自动降低保护你</div>
-          </div>
-          <div class="eright">
-            <div class="eval w">↓32%</div>
-            <div class="eact">→ 4.0W</div>
+          <div class="eitem">
+            <div class="ebar ok"></div>
+            <div class="etime">09:18</div>
+            <div class="ebody"><div class="emain">Back to baseline</div><div class="esub">心率恢复，功率恢复</div></div>
+            <div class="eright"><div class="eval ok">84 bpm</div><div class="eact">→ 6.2W</div></div>
           </div>
         </div>
 
-        <div class="estitle" style="margin-top:14px">This week · 本周趋势</div>
-        <div class="wsum">
-          <div class="wcell"><div class="wnum">↓18%</div><div class="wlbl">Stress reduced</div><div class="wlbl-zh">压力指数下降</div></div>
-          <div class="wcell"><div class="wnum">2×</div><div class="wlbl">Triggers today</div><div class="wlbl-zh">今日触发次数</div></div>
-          <div class="wcell"><div class="wnum">97%</div><div class="wlbl">Avg blood oxygen</div><div class="wlbl-zh">平均血氧</div></div>
-          <div class="wcell"><div class="wnum">Day 14</div><div class="wlbl">Monitoring</div><div class="wlbl-zh">监测第14天</div></div>
+        <!-- Stress panel -->
+        <div id="mp-stress" style="display:none">
+          <div class="ccrd">
+            <div class="clbl">
+              Stress level · 压力指数
+              <div style="font-family:'DM Mono',monospace;font-size:10px;color:#22d3ee">低 now</div>
+            </div>
+            <svg viewBox="0 0 300 96" width="100%" height="96">
+              <defs>
+                <linearGradient id="cg-st" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#fb923c"/></linearGradient>
+                <linearGradient id="ag-st" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fb923c" stop-opacity=".08"/><stop offset="100%" stop-color="#fb923c" stop-opacity="0"/></linearGradient>
+              </defs>
+              <line x1="20" y1="8"  x2="285" y2="8"  stroke="#1a2d3a" stroke-width=".5"/>
+              <line x1="20" y1="30" x2="285" y2="30" stroke="#1a2d3a" stroke-width=".5"/>
+              <line x1="20" y1="52" x2="285" y2="52" stroke="#1a2d3a" stroke-width=".5"/>
+              <line x1="20" y1="74" x2="285" y2="74" stroke="#1a2d3a" stroke-width=".5"/>
+              <line x1="20" y1="22" x2="285" y2="22" stroke="#fb923c" stroke-width=".5" stroke-dasharray="4 3" opacity=".5"/>
+              <text x="238" y="18" font-size="7" fill="#fb923c" opacity=".7" font-family="monospace">−30%</text>
+              <text x="2" y="11"  font-size="7" fill="#2a4a5a" font-family="monospace">高</text>
+              <text x="2" y="33"  font-size="7" fill="#2a4a5a" font-family="monospace">中</text>
+              <text x="2" y="55"  font-size="7" fill="#2a4a5a" font-family="monospace">低</text>
+              <text x="2" y="77"  font-size="7" fill="#2a4a5a" font-family="monospace">极低</text>
+              <line x1="248" y1="8"  x2="248" y2="74" stroke="#fb923c" stroke-width=".5" stroke-dasharray="2 3" opacity=".25"/>
+              <line x1="278" y1="8"  x2="278" y2="74" stroke="#4ade80" stroke-width=".5" stroke-dasharray="2 3" opacity=".25"/>
+              <path d="M20,62 C70,61 140,59 190,57 C218,56 235,55 248,14 C258,34 266,48 278,54"
+                fill="none" stroke="url(#cg-st)" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M20,62 C70,61 140,59 190,57 C218,56 235,55 248,14 C258,34 266,48 278,54 L278,74 L20,74Z"
+                fill="url(#ag-st)"/>
+              <circle cx="248" cy="14" r="4" fill="#fb923c"/>
+              <circle cx="278" cy="54" r="3.5" fill="#4ade80"/>
+              <circle cx="278" cy="54" r="7" fill="#4ade80" opacity=".1"><animate attributeName="r" values="3;8;3" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;0;.15" dur="2s" repeatCount="indefinite"/></circle>
+              <line x1="20"  y1="74" x2="20"  y2="79" stroke="#2a4a5a" stroke-width=".5"/>
+              <line x1="248" y1="74" x2="248" y2="79" stroke="#fb923c" stroke-width=".5" opacity=".6"/>
+              <line x1="278" y1="74" x2="278" y2="79" stroke="#4ade80" stroke-width=".5" opacity=".6"/>
+              <text x="10"  y="88" font-size="7" fill="#2a4a5a" font-family="monospace">09:00</text>
+              <text x="226" y="88" font-size="7" fill="#fb923c" font-family="monospace" opacity=".8">09:34</text>
+              <text x="258" y="88" font-size="7" fill="#4ade80" font-family="monospace" opacity=".8">09:41</text>
+            </svg>
+          </div>
+          <div class="estitle">触发记录</div>
+          <div class="eitem">
+            <div class="ebar w"></div>
+            <div class="etime">09:34</div>
+            <div class="ebody"><div class="emain">HRV dropped</div><div class="esub">神经系统活跃，同期心率偏高，功率自动调整</div></div>
+            <div class="eright"><div class="eval w">↑高</div><div class="eact">→ 4.0W</div></div>
+          </div>
+          <div class="eitem">
+            <div class="ebar ok"></div>
+            <div class="etime">09:41</div>
+            <div class="ebody"><div class="emain">HRV recovered</div><div class="esub">身体恢复平稳，功率恢复</div></div>
+            <div class="eright"><div class="eval ok">↓低</div><div class="eact">→ 6.2W</div></div>
+          </div>
+          <div class="estitle" style="margin-top:10px">本周</div>
+          <div class="wsum">
+            <div class="wcell"><div class="wnum">↓18%</div><div class="wlbl">Stress down</div><div class="wlbl-zh">压力下降</div></div>
+            <div class="wcell"><div class="wnum">2×</div><div class="wlbl">Triggers</div><div class="wlbl-zh">触发次数</div></div>
+          </div>
         </div>
+
+        <!-- ── SpO2 panel ── -->
+        <div id="mp-spo2" style="display:none">
+          <div class="ccrd">
+            <div class="clbl">
+              Blood oxygen · 血氧
+              <div style="font-family:'DM Mono',monospace;font-size:10px;color:#3b82f6">97% now</div>
+            </div>
+            <svg viewBox="0 0 300 80" width="100%" height="80">
+              <defs>
+                <linearGradient id="cg-sp" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#22d3ee"/></linearGradient>
+                <linearGradient id="ag-sp" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b82f6" stop-opacity=".15"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/></linearGradient>
+              </defs>
+              <line x1="0" y1="12" x2="300" y2="12" stroke="#1a2d3a" stroke-width=".5"/>
+              <line x1="0" y1="40" x2="300" y2="40" stroke="#1a2d3a" stroke-width=".5"/>
+              <line x1="0" y1="68" x2="300" y2="68" stroke="#1a2d3a" stroke-width=".5"/>
+              <!-- Safety threshold -->
+              <line x1="0" y1="55" x2="300" y2="55" stroke="#f87171" stroke-width=".5" stroke-dasharray="4 3" opacity=".5"/>
+              <text x="246" y="51" font-size="7" fill="#f87171" opacity=".7" font-family="monospace">95%↓</text>
+              <text x="2" y="11" font-size="7" fill="#2a4a5a" font-family="monospace">100%</text>
+              <text x="2" y="39" font-size="7" fill="#2a4a5a" font-family="monospace">97%</text>
+              <text x="2" y="67" font-size="7" fill="#2a4a5a" font-family="monospace">94%</text>
+              <!-- SpO2 curve — stable, high, very little variation -->
+              <path d="M20,38 C50,36 80,34 110,35 C140,36 160,32 190,33 C220,34 250,36 278,35" fill="none" stroke="url(#cg-sp)" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M20,38 C50,36 80,34 110,35 C140,36 160,32 190,33 C220,34 250,36 278,35 L278,80 L20,80Z" fill="url(#ag-sp)"/>
+              <circle cx="278" cy="35" r="3.5" fill="#22d3ee"/>
+              <circle cx="278" cy="35" r="7" fill="#22d3ee" opacity=".12"><animate attributeName="r" values="3;8;3" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;0;.15" dur="2s" repeatCount="indefinite"/></circle>
+            </svg>
+          </div>
+          <!-- No triggers for SpO2 today -->
+          <div style="text-align:center;padding:20px 0;color:var(--muted2)">
+            <div style="font-size:28px;margin-bottom:8px">✓</div>
+            <div style="font-size:13px;color:var(--muted)">血氧正常，今日无异常</div>
+            <div style="font-size:11px;color:var(--muted2);margin-top:3px">No alerts today</div>
+          </div>
+          <div class="estitle" style="margin-top:4px">本周</div>
+          <div class="wsum">
+            <div class="wcell"><div class="wnum">97%</div><div class="wlbl">Avg SpO₂</div><div class="wlbl-zh">平均血氧</div></div>
+            <div class="wcell"><div class="wnum">0×</div><div class="wlbl">Alerts</div><div class="wlbl-zh">异常次数</div></div>
+          </div>
+        </div>
+
       </div>
 
       <!-- SETTINGS -->
@@ -647,7 +737,7 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
           <div style="flex:1;position:relative">
             <div class="pname">Yu Siyang</div>
             <div class="psince">Since Mar 9, 2026</div>
-            <div class="psince-zh">监测开始于 2026年3月9日</div>
+            <div class="psince-zh">2026年3月9日起</div>
           </div>
           <div class="pday">
             <div class="dnum">14</div>
@@ -655,12 +745,12 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
           </div>
         </div>
 
-        <div class="stitle">Protection · <span>保护阈值 · Thresholds</span></div>
+        <div class="stitle">Protection · <span>保护阈值</span></div>
         <div class="slcard">
           <div class="sltop">
             <div>
               <div class="slname">Heart rate trigger</div>
-              <div class="slname-zh">心率超出基线多少时触发保护</div>
+              <div class="slname-zh">超出基线多少时触发</div>
             </div>
             <div class="slval" id="hrd">+15 <span class="slval-u">bpm</span></div>
           </div>
@@ -671,7 +761,7 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
           <div class="sltop">
             <div>
               <div class="slname">Limited power</div>
-              <div class="slname-zh">触发保护后，功率降至</div>
+              <div class="slname-zh">触发后降至</div>
             </div>
             <div class="slval" id="pwd">4.0 <span class="slval-u">W</span></div>
           </div>
@@ -679,15 +769,15 @@ html,body{width:100%;height:100%;background:var(--bg);font-family:'Syne','Noto S
           <div class="slrange"><span>1W</span><span>5W</span><span>10W</span></div>
         </div>
 
-        <div class="stitle">Alerts · <span>提醒设置 · Notifications</span></div>
-        <div class="trow" onclick="tgl(this)"><div class="tinfo"><div class="tname">Vibrate when triggered</div><div class="tname-zh">触发保护时震动提醒</div></div><div class="tsw on"><div class="tknob"></div></div></div>
-        <div class="trow" onclick="tgl(this)"><div class="tinfo"><div class="tname">Blood oxygen safety alert</div><div class="tname-zh">血氧异常时强制提醒</div></div><div class="tsw on"><div class="tknob"></div></div></div>
-        <div class="trow" onclick="tgl(this)"><div class="tinfo"><div class="tname">Weekly recovery report</div><div class="tname-zh">每周身体恢复趋势报告</div></div><div class="tsw on"><div class="tknob"></div></div></div>
-        <div class="trow" onclick="tgl(this)"><div class="tinfo"><div class="tname">Wearable connected</div><div class="tname-zh">可穿戴设备已配对</div></div><div class="tsw on"><div class="tknob"></div></div></div>
+        <div class="stitle">Alerts · <span>提醒</span></div>
+        <div class="trow" onclick="tgl(this)"><div class="tinfo"><div class="tname">Vibrate on trigger</div><div class="tname-zh">触发时震动</div></div><div class="tsw on"><div class="tknob"></div></div></div>
+        <div class="trow" onclick="tgl(this)"><div class="tinfo"><div class="tname">SpO₂ safety alert</div><div class="tname-zh">血氧异常时提醒</div></div><div class="tsw on"><div class="tknob"></div></div></div>
+        <div class="trow" onclick="tgl(this)"><div class="tinfo"><div class="tname">Weekly report</div><div class="tname-zh">每周恢复报告</div></div><div class="tsw on"><div class="tknob"></div></div></div>
+        <div class="trow" onclick="tgl(this)"><div class="tinfo"><div class="tname">Wearable</div><div class="tname-zh">已配对</div></div><div class="tsw on"><div class="tknob"></div></div></div>
 
         <div class="dbtn" onclick="triggerDemo()">
-          <div class="dbtn-en">⚡ Simulate protection trigger</div>
-          <div class="dbtn-zh">演示：模拟心率超标，触发功率保护</div>
+          <div class="dbtn-en">⚡ Simulate trigger</div>
+          <div class="dbtn-zh">模拟心率超标演示</div>
         </div>
       </div>
 
@@ -755,9 +845,9 @@ function pick(k){
 function goConnectWatch(){
   goTo('pg-conn');
   const steps=[
-    ['正在搜索手环…','请确保蓝牙已开启 · Scanning nearby'],
-    ['发现设备，正在配对…','Found wearable · Pairing now'],
-    ['手环连接成功 ✓','Wearable connected · Reading biometrics'],
+    ['Looking for your wearable…','请确保蓝牙已开启 · Scanning nearby'],
+    ['发现设备，配对中…','Found · Pairing now'],
+    ['手环已连接 ✓','Connected · Reading your data'],
   ];
   let i=0;
   const run=()=>{
@@ -777,10 +867,10 @@ function goConnectDevice(){
   const title=document.getElementById('device-title');
   const sub=document.getElementById('device-sub');
   const steps=[
-    {t:'正在搜索 NYMIC 设备…',s:'请确保设备已开机 · Power on your NYMIC device',p:20},
-    {t:'发现 NYMIC-NM01',s:'正在建立蓝牙连接 · Establishing BLE connection',p:55},
-    {t:'正在验证固件版本…',s:'Verifying firmware · NYMIC OS v1.2.4',p:80},
-    {t:'NYMIC 设备连接成功 ✓',s:'All systems connected · Ready to monitor',p:100},
+    {t:'Looking for NYMIC device…',s:'请确保设备已开机',p:20},
+    {t:'发现 NYMIC-NM01',s:'正在连接…',p:55},
+    {t:'验证设备版本…',s:'NYMIC OS v1.2.4',p:80},
+    {t:'连接成功 ✓',s:'Ready to go',p:100},
   ];
   let i=0;
   const run=()=>{
@@ -831,11 +921,11 @@ function triggerDemo(){
   if(demo)return;
   demo=true;
   document.getElementById('h-emoji').textContent='⚡';
-  document.getElementById('h-state').textContent='Protecting you now';
-  document.getElementById('h-zh').textContent='检测到心率超标，功率已自动降低保护你';
+  document.getElementById('h-state').textContent='Taking care of you';
+  document.getElementById('h-zh').textContent='检测到身体信号，功率已自动调整';
   document.getElementById('hr-num').innerHTML='102<span class="mc-unit" style="font-size:13px"> bpm</span>';
   document.getElementById('gauge-needle').style.transform='rotate(68deg)';
-  document.getElementById('nv-sub').textContent='Stressed · 压力偏高';
+  document.getElementById('nv-sub').textContent='压力偏高';
   document.getElementById('pval').textContent='4.0 W';
   document.getElementById('bfill').style.width='40%';
   document.getElementById('bfill').style.background='linear-gradient(90deg,#fb923c,#f87171)';
@@ -846,11 +936,11 @@ function triggerDemo(){
     setTimeout(()=>{
       demo=false;bhr=74;
       document.getElementById('h-emoji').textContent='😌';
-      document.getElementById('h-state').textContent="You're doing well";
-      document.getElementById('h-zh').textContent='身体状态正常，设备全功率运行';
+      document.getElementById('h-state').textContent="All clear";
+      document.getElementById('h-zh').textContent='一切正常，正在监测';
       document.getElementById('hr-num').innerHTML='74<span class="mc-unit" style="font-size:13px"> bpm</span>';
       document.getElementById('gauge-needle').style.transform='rotate(-68deg)';
-      document.getElementById('nv-sub').textContent='Relaxed · 放松';
+      document.getElementById('nv-sub').textContent='放松';
       document.getElementById('pval').textContent='6.2 W';
       document.getElementById('bfill').style.width='62%';
       document.getElementById('bfill').style.background='linear-gradient(135deg,#4ade80,#22d3ee,#3b82f6)';
@@ -868,8 +958,8 @@ const ttData={
   },
   stress:{
     icon:'🧠',en:'Stress Level',zh:'压力指数',
-    desc:'Derived from Heart Rate Variability (HRV) — a measure of how well your nervous system is balancing stress and recovery. A high stress level means nicotine is actively exciting your nervous system. Lower is better.',
-    descZh:'来源于心率变异性（HRV）——衡量你的神经系统在压力与恢复之间的平衡状态。压力指数高说明尼古丁正在刺激你的神经系统，数值越低状态越好。'
+    desc:'A visual representation of your Heart Rate Variability (HRV). When nicotine stimulates your nervous system, HRV drops — stress rises. This is a mirror, not a judge. It helps you see the pattern between your usage and how your body responds.',
+    descZh:'来自心率变异性（HRV）的可视化呈现。尼古丁刺激神经系统时HRV下降，压力指数随之升高。这是一面镜子，不是裁判——帮你看清使用习惯与身体反应之间的关系。'
   },
   power:{
     icon:'⚡',en:'Device Power Output',zh:'设备功率输出',
@@ -920,6 +1010,14 @@ function initSl(tid,fid,hid,did,mn,mx,iv,unit,dec,pre){
 }
 initSl('hrt','hrf','hrh','hrd',8,30,15,'bpm',0,'+');
 initSl('pwt','pwf','pwh','pwd',1,10,4,'W',1);
+
+// Metric tabs
+function switchMetric(key){
+  ['hr','stress','spo2'].forEach(k=>{
+    document.getElementById('mp-'+k).style.display=k===key?'block':'none';
+    document.getElementById('mt-'+k).classList.toggle('active',k===key);
+  });
+}
 
 // Toggles
 function tgl(card){const s=card.querySelector('.tsw');s.classList.toggle('on');s.classList.toggle('off');}
