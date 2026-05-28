@@ -239,6 +239,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
   backdrop-filter:blur(12px);max-width:88%;text-align:center;letter-spacing:.02em;
   box-shadow:0 0 30px -8px rgba(63,216,255,.5)}
 #toast.show{opacity:1;transform:translateX(-50%)}
+
+/* 功率切换强调动效 */
+@keyframes powerPulse{0%{transform:scale(1)}40%{transform:scale(1.07)}100%{transform:scale(1)}}
+.manual button.flash{animation:powerPulse .5s ease}
+@keyframes valFlash{0%{color:var(--cy);text-shadow:0 0 20px rgba(63,216,255,.5)}40%{color:#fff;text-shadow:0 0 30px rgba(63,216,255,.9)}100%{}}
+.power-card .val.flash{animation:valFlash .6s ease}
+.power-card .val{transition:color .3s}
 </style>
 </head>
 <body>
@@ -328,8 +335,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
       <svg id="gauge" viewBox="0 0 160 100" style="width:100%;margin-top:auto">
         <path d="M15 95 A65 65 0 0 1 145 95" fill="none" stroke="rgba(140,170,200,.12)" stroke-width="12" stroke-linecap="round"/>
         <path id="gaugeArc" d="M15 95 A65 65 0 0 1 145 95" fill="none" stroke="url(#gg)" stroke-width="12"
-          stroke-linecap="round" stroke-dasharray="204" stroke-dashoffset="140"/>
-        <line id="gaugeNeedle" x1="80" y1="95" x2="40" y2="60" stroke="#eaf0f6" stroke-width="3" stroke-linecap="round"/>
+          stroke-linecap="round" stroke-dasharray="204" stroke-dashoffset="163" style="transition:stroke-dashoffset .25s ease"/>
+        <line id="gaugeNeedle" x1="80" y1="95" x2="33.1" y2="60.9" stroke="#eaf0f6" stroke-width="3" stroke-linecap="round" style="transition:all .25s ease"/>
         <circle cx="80" cy="95" r="5" fill="#eaf0f6"/>
         <text x="14" y="92" fill="#3fe0a8" font-size="10" font-family="monospace">低</text>
         <text x="74" y="20" fill="#535d6e" font-size="10" font-family="monospace">中</text>
@@ -588,9 +595,20 @@ async function sendPowerCommand(level){   // level = 'high' | 'low'
 // ── power state UI ──
 const HIGH_W='6.2', LOW_W='4.0';
 function setPowerUI(level){
-  document.getElementById('powerVal').textContent = level==='high'?HIGH_W:LOW_W;
-  document.getElementById('mHi').classList.toggle('on',level==='high');
-  document.getElementById('mLo').classList.toggle('on',level==='low');
+  const pv=document.getElementById('powerVal');
+  const valBox=pv.parentElement;
+  pv.textContent = level==='high'?HIGH_W:LOW_W;
+  // 功率数字颜色: 高=青, 低=暖红, 直观区分
+  valBox.style.color = level==='high' ? 'var(--cy)' : 'var(--hi)';
+  pv.nextElementSibling.style.color = level==='high' ? 'var(--cy2)' : 'var(--hi)';
+  // 数字闪一下
+  valBox.classList.remove('flash'); void valBox.offsetWidth; valBox.classList.add('flash');
+  // 按钮高亮切换 + 脉冲
+  const hi=document.getElementById('mHi'), lo=document.getElementById('mLo');
+  hi.classList.toggle('on',level==='high');
+  lo.classList.toggle('on',level==='low');
+  const active = level==='high'?hi:lo;
+  active.classList.remove('flash'); void active.offsetWidth; active.classList.add('flash');
 }
 async function manualPower(level){
   await sendPowerCommand(level);
@@ -598,13 +616,19 @@ async function manualPower(level){
   toast(level==='high'?'已切换 → 高功率 '+HIGH_W+'W':'已切换 → 低功率 '+LOW_W+'W');
 }
 
-// ── gauge control ──
-function setGauge(pct){ // 0..1
+// ── gauge control ── 弧线与指针基于同一几何: 圆心(80,95) 半径65 的上半圆
+function setGauge(pct){ // pct: 0(低)..1(高)
+  pct=Math.max(0,Math.min(1,pct));
+  const ARC_LEN=204;                       // π×65 ≈ 半圆弧长
   const arc=document.getElementById('gaugeArc');
-  arc.style.strokeDashoffset = 204*(1-pct*0.5); // half circle ~204 len, use lower half
-  const ang=Math.PI*(1-pct); const cx=80,cy=95,r=52;
-  const nx=cx+r*Math.cos(ang), ny=cy-r*Math.sin(ang);
-  const n=document.getElementById('gaugeNeedle');n.setAttribute('x2',nx);n.setAttribute('y2',ny);
+  arc.style.strokeDashoffset = ARC_LEN*(1-pct);   // pct=1 走满, pct=0 全空
+  // 指针: 角度从 180°(左) 扫到 0°(右)
+  const ang=Math.PI*(1-pct);
+  const cx=80, cy=95, r=58;
+  const nx=cx + r*Math.cos(ang);
+  const ny=cy - r*Math.sin(ang);
+  const n=document.getElementById('gaugeNeedle');
+  n.setAttribute('x2',nx.toFixed(1)); n.setAttribute('y2',ny.toFixed(1));
 }
 setGauge(0.2);
 
