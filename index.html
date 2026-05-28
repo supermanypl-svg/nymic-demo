@@ -29,7 +29,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);
     radial-gradient(70% 50% at 50% 108%,rgba(110,139,255,.07),transparent 60%);
   -webkit-font-smoothing:antialiased;}
 .app{max-width:480px;margin:0 auto;height:100dvh;position:relative;overflow:hidden}
-.screen{position:absolute;inset:0;overflow-y:auto;padding:max(env(safe-area-inset-top),26px) 24px 116px;
+.screen{position:absolute;inset:0;overflow-y:auto;padding:max(env(safe-area-inset-top),20px) 24px 100px;
   opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .45s cubic-bezier(.2,.7,.2,1),transform .45s cubic-bezier(.2,.7,.2,1)}
 .screen.active{opacity:1;transform:none;pointer-events:auto}
 .screen.flow{padding-bottom:30px}
@@ -50,7 +50,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);
 .btn-primary:active{transform:translateY(1px) scale(.992)}
 .btn-primary small{display:block;font-weight:500;font-size:11.5px;opacity:.7;margin-top:4px;font-family:var(--mono);letter-spacing:.04em}
 
-.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;
   backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
   box-shadow:0 0 0 1px rgba(120,180,255,.04) inset,0 10px 34px -16px rgba(63,216,255,.22)}
 .card::before{content:"";position:absolute;inset:0;border-radius:16px;padding:1px;
@@ -59,14 +59,14 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);
 .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;color:var(--cy);text-transform:uppercase;font-weight:500}
 
 .topbar{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);
-  font-size:12.5px;margin-bottom:24px;padding-top:2px}
+  font-size:12.5px;margin-bottom:18px;padding-top:2px}
 .topbar .clock{color:var(--cy);font-weight:500;font-size:14px;letter-spacing:.06em;text-shadow:0 0 12px rgba(63,216,255,.55)}
 .conn{display:flex;align-items:center;gap:8px;color:var(--dim);font-size:12px;letter-spacing:.03em}
 .conn .d{width:7px;height:7px;border-radius:50%;background:var(--dim2);transition:.3s}
 .conn.on .d{background:var(--ok);box-shadow:0 0 10px var(--ok);animation:breathe 2.4s infinite}
 @keyframes breathe{0%,100%{opacity:1}50%{opacity:.4}}
 
-.logo{display:flex;align-items:center;gap:13px;margin-bottom:24px}
+.logo{display:flex;align-items:center;gap:13px;margin-bottom:16px}
 .logo svg{width:40px;height:40px;flex:none;filter:drop-shadow(0 0 8px rgba(63,216,255,.5))}
 .logo .wd{font-family:var(--disp);font-weight:600;font-size:23px;letter-spacing:.2em;line-height:1;
   background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -112,10 +112,10 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);
 .dev.sel .radio{background:var(--cy);border-color:var(--cy);color:#04101e;box-shadow:0 0 12px rgba(63,216,255,.6)}
 .dev.sel .radio svg{opacity:1}
 
-.status-card{text-align:center;padding:34px 22px;margin-bottom:16px;border-color:var(--line2)}
+.status-card{text-align:center;padding:26px 22px;margin-bottom:12px;border-color:var(--line2)}
 .status-card.alert{border-color:rgba(255,107,138,.4)}
-.status-card .eyebrow{margin-bottom:20px}
-.status-card .ring{width:80px;height:80px;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;
+.status-card .eyebrow{margin-bottom:14px}
+.status-card .ring{width:72px;height:72px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;
   border-radius:50%;color:var(--ok);transition:.4s;
   background:radial-gradient(circle,rgba(63,224,168,.14),transparent 70%);
   box-shadow:0 0 32px rgba(63,224,168,.45),0 0 0 1px rgba(63,224,168,.35) inset}
@@ -125,13 +125,13 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);
 .status-card h2{font-family:var(--disp);font-size:34px;font-weight:600;margin-bottom:8px;letter-spacing:.02em;
   text-shadow:0 0 26px rgba(63,224,168,.4)}
 .status-card.alert h2{text-shadow:0 0 26px rgba(255,107,138,.4)}
-.status-card .zh{color:var(--dim);font-size:14px;margin-bottom:20px;font-weight:300}
+.status-card .zh{color:var(--dim);font-size:14px;margin-bottom:14px;font-weight:300}
 .status-card .pill{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
   padding:9px 20px;border-radius:30px;border:1px solid rgba(63,224,168,.4);color:var(--ok);background:rgba(63,224,168,.08)}
 .status-card.alert .pill{border-color:rgba(255,107,138,.4);color:var(--hi);background:rgba(255,107,138,.08)}
 .status-card .pill .d{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;animation:breathe 1.8s infinite}
 
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 .metric .ic{width:22px;height:22px;color:var(--cy);margin-bottom:14px}
 .metric .ic svg{width:22px;height:22px;filter:drop-shadow(0 0 5px rgba(63,216,255,.5))}
 .metric .val{font-family:var(--disp);font-size:42px;font-weight:600;line-height:1;letter-spacing:-.01em}
@@ -417,7 +417,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
     </div>
   </div>
 
-  <div class="card power-card" style="margin-bottom:14px">
+  <div class="card power-card" style="margin-bottom:12px">
     <div><div class="lbl">Power output · 功率输出</div></div>
     <div class="val"><span id="powerVal">6.2</span><span class="u"> W</span></div>
   </div>
