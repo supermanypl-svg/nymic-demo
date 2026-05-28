@@ -240,6 +240,38 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
   box-shadow:0 0 30px -8px rgba(63,216,255,.5)}
 #toast.show{opacity:1;transform:translateX(-50%)}
 
+/* ── 连接 NYMIC 设备屏 ── */
+.connect-stage{display:flex;flex-direction:column;align-items:center;margin:30px 0 26px}
+.radar{position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center;margin-bottom:30px}
+.radar .wave{position:absolute;width:60px;height:60px;border-radius:50%;border:1.5px solid var(--cy);
+  opacity:0;animation:radarWave 2.6s cubic-bezier(.2,.6,.3,1) infinite}
+.radar .wave:nth-child(2){animation-delay:.85s}
+.radar .wave:nth-child(3){animation-delay:1.7s}
+@keyframes radarWave{0%{transform:scale(1);opacity:.7}100%{transform:scale(3.2);opacity:0}}
+.radar.connected .wave{animation:none;opacity:0}
+.dev-icon{position:relative;z-index:2;width:84px;height:84px;border-radius:24px;
+  display:flex;align-items:center;justify-content:center;color:var(--cy);
+  background:radial-gradient(circle,rgba(63,216,255,.12),transparent 70%);
+  border:1px solid var(--line2);box-shadow:0 0 30px -6px rgba(63,216,255,.5);transition:.5s}
+.dev-icon svg{width:38px;height:62px}
+.radar.connected .dev-icon{color:var(--ok);border-color:rgba(63,224,168,.5);
+  box-shadow:0 0 36px -4px rgba(63,224,168,.6);background:radial-gradient(circle,rgba(63,224,168,.15),transparent 70%)}
+.found-dev{display:flex;align-items:center;gap:14px;width:100%;background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:16px 18px;opacity:0;transform:translateY(10px);transition:.4s;pointer-events:none}
+.found-dev.show{opacity:1;transform:none}
+.found-dev.linked{border-color:rgba(63,224,168,.5);box-shadow:0 0 22px -8px rgba(63,224,168,.5)}
+.fd-dot span{display:block;width:10px;height:10px;border-radius:50%;background:var(--cy);box-shadow:0 0 10px var(--cy);animation:breathe 1.6s infinite}
+.found-dev.linked .fd-dot span{background:var(--ok);box-shadow:0 0 10px var(--ok)}
+.fd-info{flex:1}
+.fd-info .t{font-family:var(--disp);font-weight:600;font-size:16px;letter-spacing:.02em}
+.fd-info .d{color:var(--dim);font-size:12px;margin-top:2px;font-family:var(--mono)}
+.found-dev.linked .fd-info .d{color:var(--ok)}
+.fd-rssi{font-family:var(--mono);color:var(--cy);font-size:13px;letter-spacing:.1em}
+.found-dev.linked .fd-rssi{color:var(--ok)}
+.connect-status{text-align:center;color:var(--dim);font-size:13.5px;font-family:var(--mono);
+  letter-spacing:.02em;margin-bottom:22px;min-height:20px;transition:color .3s}
+.connect-status.ok{color:var(--ok)}
+
 /* 功率切换强调动效 */
 @keyframes powerPulse{0%{transform:scale(1)}40%{transform:scale(1.07)}100%{transform:scale(1)}}
 .manual button.flash{animation:powerPulse .5s ease}
@@ -302,7 +334,44 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
       <div class="radio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M4 12l5 5L20 6"/></svg></div>
     </div>
   </div>
-  <button class="btn-primary" onclick="go('home')">下一步，连接手环 / 手表<small>Next · Connect wearable</small></button>
+  <button class="btn-primary" onclick="go('connect')">下一步，连接 NYMIC 设备<small>Next · Connect your NYMIC</small></button>
+</section>
+
+<!-- ════ CONNECT NYMIC DEVICE ════ -->
+<section class="screen flow" id="screen-connect">
+  <div class="step-head">
+    <span class="eyebrow">STEP 2 / 2</span>
+    <h2>连接 NYMIC 设备</h2>
+    <div class="en">Connect your NYMIC device</div>
+    <div class="zh">配对你的 NYMIC 电子烟主机</div>
+    <div class="ensub">Pairs over Bluetooth · 蓝牙连接</div>
+  </div>
+
+  <div class="connect-stage">
+    <!-- 设备图标 + 雷达波纹 -->
+    <div class="radar" id="radar">
+      <span class="wave"></span><span class="wave"></span><span class="wave"></span>
+      <div class="dev-icon">
+        <svg viewBox="0 0 48 80" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="14" y="6" width="20" height="68" rx="9"/>
+          <rect x="18" y="2" width="12" height="7" rx="3" fill="currentColor" stroke="none"/>
+          <circle cx="24" cy="58" r="4" stroke-width="1.5"/>
+          <path d="M20 22h8M20 30h8" stroke-width="1.5" opacity=".5"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 发现的设备卡片，连接中前隐藏 -->
+    <div class="found-dev" id="foundDev">
+      <div class="fd-dot"><span></span></div>
+      <div class="fd-info"><div class="t">NYMIC-NM01</div><div class="d" id="fdStatus">已发现 · 信号良好</div></div>
+      <div class="fd-rssi">▮▮▮</div>
+    </div>
+  </div>
+
+  <div class="connect-status" id="connStatus">正在搜索附近的 NYMIC 设备…</div>
+  <button class="btn-primary" id="connectBtn" onclick="startConnectFlow()">连接设备<small>Connect · 点击开始配对</small></button>
+  <button class="skip" style="display:block;margin:18px auto 0;color:var(--dim2);font-size:13px;background:none;border:none;cursor:pointer;font-family:var(--mono)" onclick="go('home')">暂时跳过 · Skip</button>
 </section>
 
 <!-- ════ HOME ════ -->
@@ -467,19 +536,82 @@ const LOGO = `<svg viewBox="0 0 100 100" fill="none">
 document.querySelectorAll('.logoMark').forEach(e=>e.innerHTML=LOGO);
 
 // ── screen routing ──
-const screens=['splash','select','home','trends','settings'];
-const flowScreens=['splash','select'];
+const screens=['splash','select','connect','home','trends','settings'];
+const flowScreens=['splash','select','connect'];
 function go(name){
   screens.forEach(s=>document.getElementById('screen-'+s).classList.toggle('active',s===name));
   const tb=document.getElementById('tabbar');
   tb.classList.toggle('hidden',flowScreens.includes(name));
   document.querySelectorAll('.tabbar .tab').forEach(t=>t.classList.toggle('on',t.dataset.tab===name));
   document.querySelectorAll('.screen').forEach(s=>s.scrollTop=0);
+  if(name==='connect') resetConnectScreen();
 }
 function pickDev(el){
   document.querySelectorAll('[data-dev]').forEach(d=>{d.classList.remove('sel');d.querySelector('.radio').textContent='';});
   el.classList.add('sel');el.querySelector('.radio').textContent='✓';
 }
+
+// ── 连接 NYMIC 设备流程 ──
+let connectSearchTimer=null;
+function resetConnectScreen(){
+  const radar=document.getElementById('radar');
+  const found=document.getElementById('foundDev');
+  const status=document.getElementById('connStatus');
+  const btn=document.getElementById('connectBtn');
+  if(!radar)return;
+  radar.classList.remove('connected');
+  found.classList.remove('show','linked');
+  status.classList.remove('ok');
+  status.textContent='正在搜索附近的 NYMIC 设备…';
+  btn.style.display='';
+  btn.querySelector('small')?.remove?.();
+  btn.innerHTML='连接设备<small>Connect · 点击开始配对</small>';
+  document.getElementById('fdStatus').textContent='已发现 · 信号良好';
+  // 2 秒后"发现设备"
+  clearTimeout(connectSearchTimer);
+  connectSearchTimer=setTimeout(()=>{
+    found.classList.add('show');
+    status.textContent='发现 NYMIC-NM01 · 点击连接';
+  },2000);
+}
+// 点"连接设备"：真机走真蓝牙，否则播放连接动画
+async function startConnectFlow(){
+  const radar=document.getElementById('radar');
+  const found=document.getElementById('foundDev');
+  const status=document.getElementById('connStatus');
+  const btn=document.getElementById('connectBtn');
+  const fdStatus=document.getElementById('fdStatus');
+  found.classList.add('show');
+  status.textContent='正在连接 NYMIC-NM01…';
+  fdStatus.textContent='连接中…';
+  btn.innerHTML='连接中…';
+
+  // 真机：尝试真蓝牙连接（用户手势触发，符合 Web Bluetooth 要求）
+  if(navigator.bluetooth){
+    try{
+      await connectBLE();          // 真正连方案板
+      if(bleChar){ return finishConnect(true); }  // 真连成功
+    }catch(e){ /* 落到模拟动画 */ }
+  }
+  // 模拟：1.4 秒后"连接成功"
+  setTimeout(()=>finishConnect(false),1400);
+}
+function finishConnect(real){
+  const radar=document.getElementById('radar');
+  const found=document.getElementById('foundDev');
+  const status=document.getElementById('connStatus');
+  const btn=document.getElementById('connectBtn');
+  radar.classList.add('connected');
+  found.classList.add('linked');
+  document.getElementById('fdStatus').textContent='已连接 · '+(real?'真机':'NYMIC-NM01');
+  status.textContent='✓ 连接成功，正在初始化…';
+  status.classList.add('ok');
+  btn.innerHTML='进入主页<small>Enter · 已就绪</small>';
+  btn.onclick=()=>{ go('home'); btn.onclick=startConnectFlow; };
+  // 1.6 秒后自动进主页
+  setTimeout(()=>{ if(document.getElementById('screen-connect').classList.contains('active')) go('home'); },1600);
+}
+
 
 // ── clock ──
 function tick(){
