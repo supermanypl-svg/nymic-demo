@@ -374,36 +374,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
   <div class="h-big">Today's readings</div>
   <div class="h-zh">今日数据</div>
   <div class="tabs">
-    <button class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l2-5 3 9 2-5h7"/></svg>心率</button><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 3a4 4 0 00-4 4c-1 0-2 1-2 2.5S4 12 5 12c0 2 1.5 3 3 3M15 3a4 4 0 014 4c1 0 2 1 2 2.5S20 12 19 12c0 2-1.5 3-3 3M9 3v15M15 3v15"/></svg>压力</button><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 4v8M12 12c0 4-2 6-5 6-2 0-3-2-3-5l1-5M12 12c0 4 2 6 5 6 2 0 3-2 3-5l-1-5"/></svg>血氧</button>
+    <button class="on" data-metric="hr" onclick="switchMetric('hr',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l2-5 3 9 2-5h7"/></svg>心率</button><button data-metric="stress" onclick="switchMetric('stress',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 3a4 4 0 00-4 4c-1 0-2 1-2 2.5S4 12 5 12c0 2 1.5 3 3 3M15 3a4 4 0 014 4c1 0 2 1 2 2.5S20 12 19 12c0 2-1.5 3-3 3M9 3v15M15 3v15"/></svg>压力</button><button data-metric="spo2" onclick="switchMetric('spo2',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 4v8M12 12c0 4-2 6-5 6-2 0-3-2-3-5l1-5M12 12c0 4 2 6 5 6 2 0 3-2 3-5l-1-5"/></svg>血氧</button>
   </div>
-  <div class="card">
-    <div class="chart-head"><span class="t">Heart rate · 心率</span><span class="now"><span id="trendNow">72</span> bpm now</span></div>
-    <svg viewBox="0 0 340 180" style="width:100%">
-      <line x1="40" y1="30" x2="330" y2="30" stroke="rgba(140,170,200,.08)" stroke-width="1"/>
-      <line x1="40" y1="75" x2="330" y2="75" stroke="rgba(140,170,200,.08)" stroke-width="1"/>
-      <line x1="40" y1="120" x2="330" y2="120" stroke="rgba(140,170,200,.08)" stroke-width="1"/>
-      <text x="32" y="34" fill="#535d6e" font-size="10" font-family="monospace" text-anchor="end">110</text>
-      <text x="32" y="79" fill="#535d6e" font-size="10" font-family="monospace" text-anchor="end">95</text>
-      <text x="32" y="124" fill="#535d6e" font-size="10" font-family="monospace" text-anchor="end">80</text>
-      <text x="32" y="158" fill="#535d6e" font-size="10" font-family="monospace" text-anchor="end">65</text>
-      <line x1="40" y1="42" x2="330" y2="42" stroke="#ff6b8a" stroke-width="1" stroke-dasharray="4 4" opacity=".6"/>
-      <text x="328" y="38" fill="#ff6b8a" font-size="9" font-family="monospace" text-anchor="end">+15 bpm</text>
-      <path d="M50 120 Q90 116 120 112 Q140 50 160 50 Q185 95 210 100 Q270 108 320 112" fill="none" stroke="url(#lg)" stroke-width="3"/>
-      <path d="M50 120 Q90 116 120 112 Q140 50 160 50 Q185 95 210 100 Q270 108 320 112 L320 150 L50 150 Z" fill="url(#lgf)" opacity=".25"/>
-      <circle cx="160" cy="50" r="6" fill="#ff6b8a"/><line x1="160" y1="50" x2="160" y2="150" stroke="#ff6b8a" stroke-dasharray="3 3" opacity=".5"/>
-      <circle cx="210" cy="100" r="6" fill="#3fe0a8"/>
-      <circle cx="320" cy="112" r="6" fill="#3fd8ff"/>
-      <text x="50" y="170" fill="#535d6e" font-size="10" font-family="monospace">09:00</text>
-      <text x="145" y="170" fill="#ff6b8a" font-size="10" font-family="monospace">09:12</text>
-      <text x="195" y="170" fill="#3fe0a8" font-size="10" font-family="monospace">09:18</text>
-      <text x="300" y="170" fill="#535d6e" font-size="10" font-family="monospace">09:41</text>
-      <defs>
-        <linearGradient id="lg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3fd8ff"/><stop offset="1" stop-color="#9d6eff"/></linearGradient>
-        <linearGradient id="lgf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3fd8ff"/><stop offset="1" stop-color="transparent"/></linearGradient>
-      </defs>
-    </svg>
+  <div class="card" id="chartCard">
+    <div class="chart-head"><span class="t" id="chartTitle">Heart rate · 心率</span><span class="now"><span id="chartNow">72</span> <span id="chartUnit">bpm</span> now</span></div>
+    <div id="chartBody"></div>
   </div>
-  <div class="log-title">触发记录</div>
+  <div class="log-title" id="logTitle">触发记录</div>
   <div id="eventLog">
     <div class="event hi">
       <span class="tm">09:12</span>
@@ -517,7 +494,7 @@ setInterval(()=>{
   if(currentState!=='clear')return;
   const v=baseHR+Math.round((Math.random()-.5)*6);
   document.getElementById('hrVal').textContent=v;
-  document.getElementById('trendNow').textContent=v-6;
+  if(currentMetric==='hr'){const el=document.getElementById('chartNow');if(el)el.textContent=v-6;}
 },2200);
 
 // ── toast ──
@@ -633,12 +610,107 @@ function setGauge(pct){ // pct: 0(低)..1(高)
 setGauge(0.2);
 
 // ══════════════════════════════════════════════════
+//  趋势页 — 三指标可切换 (心率 / 压力 / 血氧)
+// ══════════════════════════════════════════════════
+let currentMetric='hr';
+const METRICS={
+  hr:{
+    title:'Heart rate · 心率', unit:'bpm', now:72,
+    yLabels:['110','95','80','65'], color:'#3fd8ff', color2:'#9d6eff',
+    // 数据点 (0-1 归一化高度, 1=顶)
+    pts:[.18,.22,.28,.92,.62,.45,.40], peakIdx:3,
+    times:['09:00','09:12','09:18','09:41'],
+    baseline:{y:.88,label:'+15 bpm',color:'#ff6b8a'},
+    log:[
+      {type:'hi',tm:'09:12',t:'Heart rate above baseline',d:'心率超出基线，功率自动调整',v:'102 bpm',p:'→ 4.0W'},
+      {type:'ok',tm:'09:18',t:'Back to baseline',d:'心率恢复，功率恢复',v:'84 bpm',p:'→ 6.2W'}
+    ]
+  },
+  stress:{
+    title:'Stress level · 压力', unit:'pts', now:'32',
+    yLabels:['高','中','低','—'], color:'#9d6eff', color2:'#ff6b8a',
+    pts:[.30,.35,.55,.78,.50,.38,.30], peakIdx:3,
+    times:['09:00','09:12','09:18','09:41'],
+    baseline:{y:.70,label:'阈值',color:'#ffc24a'},
+    log:[
+      {type:'hi',tm:'09:12',t:'Stress spike detected',d:'压力上升，与心率同步',v:'高',p:'峰值'},
+      {type:'ok',tm:'09:20',t:'Stress normalized',d:'压力回落至放松区间',v:'低',p:'放松'}
+    ]
+  },
+  spo2:{
+    title:'Blood oxygen · 血氧', unit:'%', now:98,
+    yLabels:['100','98','96','94'], color:'#3fe0a8', color2:'#3fd8ff',
+    pts:[.85,.82,.80,.55,.70,.82,.88], peakIdx:3,
+    times:['09:00','09:12','09:18','09:41'],
+    baseline:{y:.30,label:'95% 安全线',color:'#ffc24a'},
+    log:[
+      {type:'hi',tm:'09:12',t:'SpO₂ dipped',d:'运动中血氧短暂下降',v:'95%',p:'最低'},
+      {type:'ok',tm:'09:19',t:'SpO₂ recovered',d:'血氧恢复正常',v:'98%',p:'正常'}
+    ]
+  }
+};
+
+function buildChartSVG(m){
+  const W=340,H=180, x0=44,x1=326, yT=30,yB=150;
+  const n=m.pts.length;
+  const xs=i=>x0+(x1-x0)*i/(n-1);
+  const ys=v=>yB-(yB-yT)*v;
+  // 折线路径
+  let d='';
+  m.pts.forEach((v,i)=>{ d+=(i===0?'M':'L')+xs(i).toFixed(1)+' '+ys(v).toFixed(1)+' '; });
+  const area=d+`L${xs(n-1).toFixed(1)} ${yB} L${xs(0).toFixed(1)} ${yB} Z`;
+  // 网格线
+  let grid='';
+  [0,1,2,3].forEach(i=>{ const gy=yT+(yB-yT)*i/3; grid+=`<line x1="${x0}" y1="${gy}" x2="${x1}" y2="${gy}" stroke="rgba(140,170,200,.08)" stroke-width="1"/><text x="36" y="${gy+4}" fill="#535d6e" font-size="10" font-family="monospace" text-anchor="end">${m.yLabels[i]}</text>`; });
+  // 基线虚线
+  const by=ys(m.baseline.y);
+  const baseline=`<line x1="${x0}" y1="${by}" x2="${x1}" y2="${by}" stroke="${m.baseline.color}" stroke-width="1" stroke-dasharray="4 4" opacity=".6"/><text x="${x1}" y="${by-4}" fill="${m.baseline.color}" font-size="9" font-family="monospace" text-anchor="end">${m.baseline.label}</text>`;
+  // 峰值点 + 末点
+  const pk=m.peakIdx;
+  const dots=`<circle cx="${xs(pk).toFixed(1)}" cy="${ys(m.pts[pk]).toFixed(1)}" r="6" fill="${m.color2}"/><line x1="${xs(pk).toFixed(1)}" y1="${ys(m.pts[pk]).toFixed(1)}" x2="${xs(pk).toFixed(1)}" y2="${yB}" stroke="${m.color2}" stroke-dasharray="3 3" opacity=".5"/><circle cx="${xs(n-1).toFixed(1)}" cy="${ys(m.pts[n-1]).toFixed(1)}" r="6" fill="${m.color}"/>`;
+  // x轴时间 (4个)
+  const tx=[0,2,4,6];
+  let times='';
+  m.times.forEach((t,i)=>{ times+=`<text x="${xs(tx[i]).toFixed(1)}" y="170" fill="#535d6e" font-size="10" font-family="monospace" text-anchor="middle">${t}</text>`; });
+  const gid='g_'+m.unit.replace(/[^a-z]/gi,'');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%">
+    ${grid}${baseline}
+    <path d="${area}" fill="url(#${gid}f)" opacity=".22"/>
+    <path d="${d}" fill="none" stroke="url(#${gid})" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    ${dots}${times}
+    <defs>
+      <linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${m.color}"/><stop offset="1" stop-color="${m.color2}"/></linearGradient>
+      <linearGradient id="${gid}f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${m.color}"/><stop offset="1" stop-color="transparent"/></linearGradient>
+    </defs></svg>`;
+}
+
+function renderMetric(key){
+  const m=METRICS[key];
+  document.getElementById('chartTitle').textContent=m.title;
+  document.getElementById('chartNow').textContent=m.now;
+  document.getElementById('chartUnit').textContent=m.unit;
+  document.getElementById('chartBody').innerHTML=buildChartSVG(m);
+  // 触发记录
+  const log=document.getElementById('eventLog');
+  log.innerHTML=m.log.map(e=>`<div class="event ${e.type}"><span class="tm">${e.tm}</span><div class="info"><div class="t">${e.t}</div><div class="d">${e.d}</div></div><div class="r"><div class="v ${e.type}">${e.v}</div><div class="p">${e.p}</div></div></div>`).join('');
+}
+
+function switchMetric(key,btn){
+  currentMetric=key;
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderMetric(key);
+}
+// 初始渲染心率
+renderMetric('hr');
+
+// ══════════════════════════════════════════════════
 //  ★ 核心演示：模拟心率飙升 → 自动降功率 ★
 // ══════════════════════════════════════════════════
 let simRunning=false;
 async function simulateSpike(){
   if(simRunning)return; simRunning=true; currentState='spike';
-  const hrEl=document.getElementById('hrVal'), trendEl=document.getElementById('trendNow');
+  const hrEl=document.getElementById('hrVal');
   const card=document.getElementById('statusCard');
   const peak=104, threshold=baseHR+15;
 
@@ -649,7 +721,7 @@ async function simulateSpike(){
     const up=setInterval(()=>{
       hr+=Math.round(2+Math.random()*4);
       if(hr>=peak){hr=peak;clearInterval(up);res();}
-      hrEl.textContent=hr;trendEl.textContent=hr-6;
+      hrEl.textContent=hr;if(currentMetric==='hr')document.getElementById('chartNow').textContent=hr-6;
       setGauge(Math.min(.95,(hr-baseHR)/30+.2));
       // 超过阈值瞬间切红 + 自动降功率
       if(hr>=threshold && !card.classList.contains('alert')){
@@ -676,7 +748,7 @@ async function simulateSpike(){
     const dn=setInterval(()=>{
       hr-=Math.round(2+Math.random()*3);
       if(hr<=baseHR){hr=baseHR;clearInterval(dn);res();}
-      hrEl.textContent=hr;trendEl.textContent=hr-6;
+      hrEl.textContent=hr;if(currentMetric==='hr')document.getElementById('chartNow').textContent=hr-6;
       setGauge(Math.max(.2,(hr-baseHR)/30+.2));
     },200);
   });
