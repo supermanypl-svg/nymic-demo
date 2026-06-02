@@ -296,6 +296,19 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .switch .k{position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;transition:.28s;box-shadow:0 2px 6px rgba(0,0,0,.3)}
 .switch.on .k{left:24px}
 
+/* ── 数据与隐私 action rows ── */
+.action-card{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:17px 18px;margin-bottom:11px;cursor:pointer;transition:border-color .22s,background .22s,transform .14s}
+.action-card:active{transform:scale(.99)}
+.action-card .ac-ic{flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:var(--acc-soft);display:flex;align-items:center;justify-content:center;color:var(--cy)}
+.action-card .ac-ic svg{width:18px;height:18px}
+.action-card .ac-body{flex:1}
+.action-card .ac-body .t{font-size:15px;font-weight:600;letter-spacing:.01em}
+.action-card .ac-body .zh{color:var(--dim);font-size:12px;margin-top:2px;font-weight:300}
+.action-card .ac-arrow{color:var(--dim2);flex:0 0 auto}
+.action-card .ac-arrow svg{width:18px;height:18px}
+.action-card.danger .ac-ic{background:rgba(255,107,138,.12);color:#ff6b8a}
+.action-card.danger .ac-body .t{color:#ff6b8a}
+
 .tabbar{position:absolute;bottom:0;left:0;right:0;display:flex;
   background:linear-gradient(180deg,transparent,var(--bg) 46%);padding:16px 0 max(env(safe-area-inset-bottom),18px);z-index:20;
   backdrop-filter:blur(8px)}
@@ -686,7 +699,37 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
     <div><div class="t">SpO₂ safety alert</div><div class="zh">血氧异常时提醒</div></div>
     <div class="switch on" onclick="this.classList.toggle('on')"><div class="k"></div></div>
   </div>
+
+  <div class="sec-label">DATA &amp; PRIVACY <span class="zh">· 数据与隐私</span></div>
+  <div class="action-card" onclick="exportData()">
+    <div class="ac-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M8 11l4 4 4-4M4 19h16"/></svg></div>
+    <div class="ac-body"><div class="t">导出我的记录</div><div class="zh">Export my data · 下载你的全部数据</div></div>
+    <div class="ac-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+  </div>
+  <div class="action-card" onclick="withdrawConsent()">
+    <div class="ac-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a9 9 0 100 18 9 9 0 000-18zM8 12h8"/></svg></div>
+    <div class="ac-body"><div class="t">撤回数据同意</div><div class="zh">Withdraw consent · 停止数据采集</div></div>
+    <div class="ac-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+  </div>
+  <div class="action-card danger" onclick="deleteData()">
+    <div class="ac-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></div>
+    <div class="ac-body"><div class="t">删除我的记录</div><div class="zh">Delete my data · 永久清除全部数据</div></div>
+    <div class="ac-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+  </div>
 </section>
+
+<!-- 删除确认弹窗 -->
+<div class="modal-mask" id="deleteModal">
+  <div class="modal">
+    <div class="mic" style="background:rgba(255,107,138,.12);color:#ff6b8a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></div>
+    <h3>删除全部数据？</h3>
+    <p>这将永久清除 NYMIC 记录的你的全部身体数据与使用记录，且无法恢复。确定继续吗？</p>
+    <div class="mbtns">
+      <button class="btn-primary" style="background:linear-gradient(110deg,#ff6b8a,#ff8aa5)" onclick="confirmDelete()">确认删除<small>Delete permanently</small></button>
+      <button class="mghost" onclick="document.getElementById('deleteModal').classList.remove('show')">取消</button>
+    </div>
+  </div>
+</div>
 
 <!-- ════ TABBAR ════ -->
 <nav class="tabbar hidden" id="tabbar">
@@ -862,8 +905,7 @@ function finishConnect(real){
   status.classList.add('ok');
   btn.innerHTML='进入主页<small>Enter · 已就绪</small>';
   btn.onclick=()=>{ go('home'); btn.onclick=startConnectFlow; };
-  // 1.6 秒后自动进主页
-  setTimeout(()=>{ if(document.getElementById('screen-connect').classList.contains('active')) go('home'); },1600);
+  // 不自动跳转，由用户点击「进入主页」，确保有足够时间阅读
 }
 
 
@@ -888,6 +930,15 @@ let toastT;
 function toast(msg){
   const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+// ── 设置页 · 数据与隐私 ──
+function exportData(){ toast('正在导出你的数据…（演示）'); }
+function withdrawConsent(){ toast('已撤回数据采集同意（演示）'); }
+function deleteData(){ document.getElementById('deleteModal').classList.add('show'); }
+function confirmDelete(){
+  document.getElementById('deleteModal').classList.remove('show');
+  toast('你的全部数据已删除（演示）');
 }
 
 // ══════════════════════════════════════════════════
